@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ĐẶNG CÔNG THÀNH — Game Designer</title>
+<!--
+  VERSION 2 — "FULL RACE"
+  Every racing visual element pushed as far as it can go:
+  · Angular clip-paths on ALL cards and buttons
+  · Corner bracket decorators on every card (track marker style)
+  · Animated scan-line sweep across hero
+  · G-meter / rev-arc decorative elements
+  · Animated entry: content slides in fast from left (like speed)
+  · Section telemetry overlays (LAP / SECTOR / STATUS per slide)
+  · Animated borders that charge up on hover
+  · Race stripe accent lines throughout
+  · Speed lines not just in hero — subtle on every slide
+  · Pit-board style section number labels
+  · Checkered dividers between every section
+  · Blinking nav logo ▶
+  · Ticker running strip
+  · "Published · Live" REC blink
+  · Name: ĐẶNG white / CÔNG THÀNH amber
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0a; --surface:#00000081; --surface2:#161616; --border:#242424;
+  --acc:#E8A020; --acc-dim:#7A5410; --acc-rgb:232,160,32;
+  --text:#E8E4DC; --text-2:#88887F; --text-3:#404040; --white:#F5F2EC;
+  --font:'Be Vietnam Pro',sans-serif; --mono:'DM Mono',monospace;
+  /* Race stripe */
+  --stripe:rgba(232,160,32,.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-snap-type:y mandatory;overflow-y:scroll;height:100%;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);
+  -webkit-font-smoothing:antialiased;cursor:none;overflow-x:hidden;}
+a{color:inherit;text-decoration:none;cursor:none;}
+
+/* ── Grain ── */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:.3;}
+
+/* ── Diagonal speed-stripe background on every slide ── */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(-12deg,
+    transparent,transparent 90px,
+    var(--stripe) 90px,var(--stripe) 91px);}
+
+/* ── Crosshair cursor ── */
+.cur{position:fixed;width:20px;height:20px;pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);}
+.cur::before,.cur::after{content:'';position:absolute;background:var(--acc);}
+.cur::before{width:2px;height:20px;left:9px;top:0;}
+.cur::after{width:20px;height:2px;top:9px;left:0;}
+.cur-r{position:fixed;width:38px;height:38px;border:1px solid var(--acc);
+  border-radius:0;pointer-events:none;z-index:9997;
+  transform:translate(-50%,-50%);opacity:.22;
+  transition:width .15s,height .15s,opacity .15s;}
+
+/* ── NAV ── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:.85rem clamp(1.5rem,5vw,4rem);
+  background:rgba(10,10,10,.97);border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);}
+/* Dual-tone gradient line — amber to amber-dim, suggests a race stripe */
+.topbar::after{content:'';position:absolute;bottom:0;
+  left:clamp(1.5rem,5vw,4rem);right:clamp(1.5rem,5vw,4rem);height:1px;
+  background:linear-gradient(90deg,var(--acc),var(--acc-dim) 50%,transparent);}
+.nav-logo{font-family:var(--mono);font-size:.72rem;color:var(--acc);
+  letter-spacing:.14em;text-transform:uppercase;
+  display:flex;align-items:center;gap:.5rem;
+  /* Clipped corner on logo badge */
+  background:rgba(232,160,32,.08);padding:.3rem .7rem;
+  clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,0 100%);}
+.nav-logo::before{content:'▶';font-size:.75rem;
+  animation:rec-blink 1.3s step-end infinite;}
+@keyframes rec-blink{0%,100%{opacity:1}50%{opacity:0}}
+.tl{display:flex;gap:2rem;list-style:none;}
+.tl a{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text-2);transition:color .15s;cursor:none;
+  position:relative;}
+/* Underline sweep on nav links */
+.tl a::after{content:'';position:absolute;bottom:-2px;left:0;right:0;
+  height:1px;background:var(--acc);transform:scaleX(0);
+  transform-origin:left;transition:transform .2s ease;}
+.tl a:hover::after{transform:scaleX(1);}
+.tl a:hover{color:var(--acc);}
+
+/* ── SLIDE ENGINE ── */
+.slide{scroll-snap-align:start;height:100vh;min-height:600px;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:5rem clamp(1.5rem,5vw,4rem) 4rem;
+  position:relative;overflow:hidden;}
+.slide:nth-child(odd){background:var(--bg);}
+.slide:nth-child(even){background:var(--surface);}
+
+/* Race stripe accent — left edge of every slide */
+.slide::before{content:'';position:absolute;top:0;left:0;
+  width:3px;height:0;background:var(--acc);
+  transition:height .6s ease;opacity:0;}
+.slide.in-view::before{height:100%;opacity:1;}
+
+/* Subtle speed lines on every slide (not just hero) */
+.slide-lines{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+.sline{position:absolute;height:1px;opacity:0;
+  background:linear-gradient(90deg,transparent,rgba(var(--acc-rgb),.06),transparent);
+  animation:sline-drift 8s linear infinite;}
+.sline:nth-child(1){top:15%;width:60%;left:-60%;animation-delay:0s;}
+.sline:nth-child(2){top:65%;width:45%;left:-45%;animation-delay:3s;}
+@keyframes sline-drift{
+  0%{opacity:0;transform:translateX(0);}
+  10%{opacity:1;}90%{opacity:.3;}
+  100%{opacity:0;transform:translateX(calc(100vw + 100%));}}
+
+/* Slide telemetry corner label — top right of each slide */
+.slide-telem{position:absolute;top:5.5rem;right:clamp(1.5rem,5vw,4rem);
+  font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;
+  color:var(--text-3);line-height:2;text-align:right;
+  opacity:0;transition:opacity .5s .3s;}
+.slide.in-view .slide-telem{opacity:1;}
+.slide-telem .tv{color:var(--acc);opacity:.6;}
+
+/* Side dot navigation */
+.side-nav{position:fixed;right:1.5rem;top:50%;transform:translateY(-50%);
+  z-index:100;display:flex;flex-direction:column;gap:.6rem;}
+/* Square dots — more angular/racing */
+.dot{width:6px;height:6px;background:var(--text-3);border-radius:0;
+  cursor:none;transition:background .2s,transform .2s;}
+.dot.active{background:var(--acc);transform:scaleY(2);}/* Elongates vertically like a rev bar */
+.slide-counter{position:fixed;bottom:1.5rem;left:clamp(1.5rem,5vw,4rem);
+  z-index:100;font-family:var(--mono);font-size:.6rem;
+  color:var(--text-3);letter-spacing:.12em;}
+
+/* Down arrow */
+.da{position:absolute;bottom:1.8rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.4rem;
+  cursor:none;opacity:.35;transition:opacity .2s;}
+.da:hover{opacity:.8;}
+.da-l{width:1px;height:40px;
+  background:linear-gradient(to bottom,var(--acc),transparent);
+  animation:pulse-down 2s ease-in-out infinite;}
+@keyframes pulse-down{0%,100%{transform:scaleY(1);opacity:1}50%{transform:scaleY(.4);opacity:.3}}
+.da-t{font-family:var(--mono);font-size:.54rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--text-3);}
+
+/* ── TICKER ── */
+.ticker{scroll-snap-align:none;
+  background:var(--surface);
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:.65rem 0;overflow:hidden;position:relative;flex-shrink:0;}
+.ticker::before,.ticker::after{content:'';position:absolute;
+  top:0;bottom:0;width:100px;z-index:2;pointer-events:none;}
+.ticker::before{left:0;background:linear-gradient(90deg,var(--surface),transparent);}
+.ticker::after{right:0;background:linear-gradient(270deg,var(--surface),transparent);}
+.tick-inner{display:flex;gap:2.5rem;
+  animation:ticker-scroll 25s linear infinite;white-space:nowrap;}
+.tick-inner:hover{animation-play-state:paused;}
+.tick-item{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text-2);
+  display:flex;align-items:center;gap:.5rem;white-space:nowrap;}
+.tick-item .sep{color:var(--acc);}
+@keyframes ticker-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── CHECKERED DIVIDER ── */
+.finish{height:8px;flex-shrink:0;
+  background:repeating-linear-gradient(90deg,
+    var(--border) 0,var(--border) 12px,
+    var(--surface2) 12px,var(--surface2) 24px);
+  opacity:.6;}
+
+/* ── SHARED TYPOGRAPHY ── */
+.sw{max-width:1200px;margin:0 auto;width:100%;position:relative;z-index:1;}
+/* Pit-board label style */
+.lbl{font-family:var(--mono);font-size:.63rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--acc);margin-bottom:.9rem;
+  display:flex;align-items:center;gap:.7rem;}
+.lbl::before{content:'//';opacity:.4;}
+.lbl::after{content:'';display:block;height:1px;width:36px;
+  background:var(--acc);opacity:.5;}
+h2.st{font-family:var(--font);font-weight:900;
+  font-size:clamp(2.2rem,4.5vw,3.8rem);
+  line-height:.95;color:var(--white);letter-spacing:-.02em;}
+
+/* ── BUTTONS — angular clip-path ── */
+.btn{padding:.7rem 1.6rem;font-family:var(--mono);font-size:.65rem;
+  letter-spacing:.12em;text-transform:uppercase;border:none;cursor:none;
+  transition:transform .12s,background .18s,color .18s,border-color .18s;
+  display:inline-flex;align-items:center;gap:.5rem;
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);}
+.btn-a{background:var(--acc);color:#000;}
+.btn-a:hover{background:#FFBA40;transform:translateX(4px);}
+.btn-b{background:transparent;color:var(--text);border:1px solid var(--border);}
+.btn-b:hover{border-color:var(--acc);color:var(--acc);transform:translateX(4px);}
+
+/* ── HERO ── */
+/* Tachometer arc rings */
+.tacho{position:absolute;top:-18%;right:-10%;width:70%;padding-bottom:70%;
+  border:1px solid rgba(var(--acc-rgb),.06);border-radius:50%;
+  animation:tacho-breathe 8s ease-in-out infinite alternate;}
+.tacho::before{content:'';position:absolute;inset:8%;
+  border:1px solid rgba(var(--acc-rgb),.04);border-radius:50%;}
+.tacho::after{content:'';position:absolute;inset:17%;
+  border:1px solid rgba(var(--acc-rgb),.07);border-radius:50%;}
+/* Inner spinning arc — suggests a rev counter needle */
+.tacho-inner{position:absolute;inset:25%;
+  border:1px solid transparent;border-top-color:rgba(var(--acc-rgb),.15);
+  border-radius:50%;animation:spin-slow 12s linear infinite;}
+@keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes tacho-breathe{from{opacity:.4;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+
+/* Speed lines — 5, more aggressive in hero */
+.sl-wrap{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.sl{position:absolute;height:1px;opacity:0;
+  background:linear-gradient(90deg,transparent,rgba(var(--acc-rgb),.3),transparent);
+  animation:speed-line 3.5s linear infinite;}
+.sl:nth-child(1){top:20%;width:55%;left:-55%;animation-delay:0s;}
+.sl:nth-child(2){top:35%;width:75%;left:-75%;animation-delay:.5s;}
+.sl:nth-child(3){top:52%;width:45%;left:-45%;animation-delay:1.1s;}
+.sl:nth-child(4){top:68%;width:65%;left:-65%;animation-delay:1.8s;}
+.sl:nth-child(5){top:80%;width:40%;left:-40%;animation-delay:2.4s;}
+@keyframes speed-line{
+  0%{opacity:0;transform:translateX(0);}
+  8%{opacity:1;}88%{opacity:.3;}
+  100%{opacity:0;transform:translateX(calc(100vw + 100%));}}
+
+/* Scan-line sweep — one bright horizontal line moving top→bottom */
+.scan{position:absolute;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(var(--acc-rgb),.12),transparent);
+  animation:scan-sweep 6s ease-in-out infinite;pointer-events:none;z-index:0;}
+@keyframes scan-sweep{
+  0%{top:-2px;opacity:0;}5%{opacity:1;}
+  95%{opacity:.6;}100%{top:100%;opacity:0;}}
+
+/* HUD data overlay */
+.hud{position:absolute;top:5.5rem;right:clamp(1.5rem,5vw,4rem);
+  font-family:var(--mono);font-size:.54rem;letter-spacing:.1em;
+  color:var(--text-3);line-height:2.1;text-align:right;
+  border-right:1px solid var(--border);padding-right:.8rem;
+  opacity:0;animation:race-enter .7s .8s both;}
+.hud .hv{color:var(--acc);opacity:.75;}
+
+/* G-meter bracket decorations — corner brackets like track markers */
+.g-meter{position:absolute;bottom:4rem;right:clamp(1.5rem,5vw,4rem);
+  width:60px;height:60px;
+  border-right:1px solid rgba(var(--acc-rgb),.2);
+  border-bottom:1px solid rgba(var(--acc-rgb),.2);
+  opacity:0;animation:race-enter .8s 1.2s both;}
+.g-meter::before{content:'G';position:absolute;bottom:.3rem;right:.4rem;
+  font-family:var(--mono);font-size:.48rem;color:var(--acc);opacity:.4;
+  letter-spacing:.1em;}
+
+/* Hero content — enters from LEFT (speed-style) */
+@keyframes race-enter{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+@keyframes race-enter-stagger{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+
+/* Grid background */
+.hero-grid{position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(var(--acc-rgb),.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(var(--acc-rgb),.03) 1px,transparent 1px);
+  background-size:80px 80px;
+  mask-image:linear-gradient(180deg,transparent,rgba(0,0,0,.6) 60%);}
+
+/* Ambient glow */
+.hero-glow{position:absolute;top:-10%;right:-5%;width:70%;height:120%;
+  background:radial-gradient(ellipse at 65% 45%,rgba(var(--acc-rgb),.07) 0%,transparent 60%);
+  animation:tacho-breathe 6s ease-in-out infinite alternate;}
+
+/* Hero text animations */
+.hey{font-family:var(--mono);font-size:.68rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--acc);margin-bottom:1.3rem;
+  opacity:0;animation:race-enter .6s .2s forwards;}
+/* NAME */
+.hn{font-family:var(--font);font-weight:900;
+  font-size:clamp(4rem,12vw,10.5rem);
+  line-height: 1.4;color:var(--white);margin-bottom:1.4rem;
+  opacity:0;animation:race-enter .7s .35s forwards;letter-spacing:-.03em;}
+.hn span{color:var(--acc);display:block;}
+.hn::after{content:'';display:block;width:0;height:3px;
+  background:var(--acc);margin-top:.5rem;
+  animation:charge-bar 1s .9s forwards;}
+@keyframes charge-bar{from{width:0}to{width:100px}}
+
+.htag{font-size:clamp(.9rem,1.6vw,1.1rem);font-weight:300;color:var(--text-2);
+  max-width:480px;line-height:1.6;
+  border-left:2px solid var(--acc);padding-left:1.1rem;
+  opacity:0;animation:race-enter .7s .5s forwards;}
+.hmeta{display:flex;gap:2rem;flex-wrap:wrap;margin-top:1.8rem;
+  opacity:0;animation:race-enter .7s .65s forwards;}
+.hstat-n{font-family:var(--font);font-weight:800;font-size:1.9rem;
+  color:var(--acc);line-height:1;}
+.hstat-l{font-family:var(--text);font-size:.58rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text);margin-top:.12rem;}
+.hcta{display:flex;gap:.8rem;margin-top:1.8rem;flex-wrap:wrap;
+  opacity:0;animation:race-enter .7s .8s forwards;}
+
+/* ── SLIDE ENTRY ANIMATIONS — fast, directional ── */
+.anim{opacity:0;transform:translateX(-20px);
+  transition:opacity .45s ease,transform .45s ease;}
+.anim.in{opacity:1;transform:none;}
+/* Grid stagger — each child enters with small delay */
+.anim-grid>*{opacity:0;transform:translateX(-14px);
+  transition:opacity .42s ease,transform .42s ease;}
+.anim-grid.in>*:nth-child(1){opacity:1;transform:none;transition-delay:.03s;}
+.anim-grid.in>*:nth-child(2){opacity:1;transform:none;transition-delay:.09s;}
+.anim-grid.in>*:nth-child(3){opacity:1;transform:none;transition-delay:.15s;}
+.anim-grid.in>*:nth-child(4){opacity:1;transform:none;transition-delay:.21s;}
+.anim-grid.in>*:nth-child(5){opacity:1;transform:none;transition-delay:.27s;}
+.anim-grid.in>*:nth-child(6){opacity:1;transform:none;transition-delay:.33s;}
+
+/* ── ANIMATED BORDER CHARGE on hover (for cards) ── */
+/* Wrapper that shows a progress-style border filling clockwise */
+.race-card{position:relative;}
+.race-card::before,.race-card::after{content:'';position:absolute;
+  background:var(--acc);transition:width .3s,height .3s;z-index:2;}
+/* Top edge */
+.race-card::before{top:0;left:0;height:1px;width:0;}
+.race-card:hover::before{width:100%;}
+/* Left edge */
+.race-card::after{top:0;left:0;width:1px;height:0;}
+.race-card:hover::after{height:100%;}
+
+/* ── CORNER BRACKET DECORATOR (track-corner marker style) ── */
+.bracket{position:relative;}
+.bracket::before,.bracket::after{content:'';position:absolute;
+  width:10px;height:10px;border-color:rgba(var(--acc-rgb),.25);}
+.bracket::before{top:0;left:0;border-top:1px solid;border-left:1px solid;}
+.bracket::after{bottom:0;right:0;border-bottom:1px solid;border-right:1px solid;}
+
+/* ── PUBLISHED · LIVE BLINK ── */
+@keyframes live-pulse{0%,100%{opacity:1;}50%{opacity:.2;}}
+.live-text{animation:live-pulse 2.4s ease-in-out infinite;}
+.live-dot{display:inline-block;width:6px;height:6px;
+  background:var(--acc);border-radius:50%;margin-right:.45rem;
+  animation:live-pulse 2.4s ease-in-out infinite;}
+
+/* ── PHILOSOPHY ── */
+.ph-grid{display:grid;grid-template-columns:1fr 1fr;
+  gap:clamp(1.5rem,4vw,4rem);align-items:start;}
+/* Angular clip on quote block */
+.ph-q{padding:2rem;border:1px solid var(--border);background:var(--surface2);
+  position:relative;
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%);}
+/* Cut-corner fill — reveals the clip */
+.ph-q::after{content:'';position:absolute;top:0;right:0;
+  width:0;height:0;border-style:solid;
+  border-width:0 14px 14px 0;
+  border-color:transparent var(--bg) transparent transparent;}
+.ph-q::before{content:'\201C';position:absolute;top:-.5rem;left:1rem;
+  font-family:var(--font);font-weight:900;font-size:4.5rem;
+  color:var(--acc);line-height:1;opacity:.7;}
+.q-vi{font-size:clamp(1.4rem,2vw,10rem);font-weight:900;color:var(--acc);
+  font-style:italic;margin:.9rem 0 .6rem;}
+.q-en{font-size:.82rem;color:var(--text-2);
+  border-top:1px solid var(--border);padding-top:.6rem;line-height:1.7;}
+.ph-body h3{font-family:var(--font);font-weight:800;
+  font-size:clamp(1.4rem,2.5vw,2rem);color:var(--white);
+  line-height:1.1;margin-bottom:1rem;letter-spacing:-.02em;}
+.ph-body p{font-size:.85rem;color:var(--text-2);line-height:1.78;margin-bottom:.8rem;}
+.ph-body p strong{color:var(--text);font-weight:600;}
+.pps{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:1.2rem;}
+/* Angular clip on principle cards */
+.pp{padding:.8rem 1rem;border:1px solid var(--border);
+  border-top:2px solid var(--acc);background:var(--surface2);
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);}
+.pp-n{font-family:var(--mono);font-size:.56rem;color:var(--acc);
+  letter-spacing:.1em;margin-bottom:.25rem;}
+.pp-t{font-size:.8rem;font-weight:700;color:var(--white);margin-bottom:.18rem;}
+.pp-d{font-size:.7rem;color:var(--text-2);line-height:1.5;}
+
+/* ── WORK ── */
+.proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start;}
+.ps-l{display:flex;flex-direction:column;gap:.85rem;}
+.ptag{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--acc);display:flex;align-items:center;gap:.4rem;}
+/* Square dot — angular */
+.ptag-dot{width:5px;height:5px;background:var(--acc);border-radius:0;}
+.ptitle{font-family:var(--font);font-weight:900;
+  font-size:clamp(2rem,4vw,3.5rem);color:var(--white);
+  line-height:.95;letter-spacing:-.03em;}
+.pstudio{font-family:var(--mono);font-size:.6rem;color:var(--text-3);}
+.pdesc{font-size:.85rem;color:var(--text-2);line-height:1.75;}
+.ptags{display:flex;flex-wrap:wrap;gap:.3rem;}
+.rt{font-family:var(--mono);font-size:.56rem;letter-spacing:.07em;
+  text-transform:uppercase;padding:.18rem .48rem;
+  border:1px solid var(--border);color:var(--text-2);}
+.ps-r{display:flex;flex-direction:column;gap:.9rem;}
+.dd{padding:1rem 1.2rem;background:rgba(var(--acc-rgb),.06);
+  border-left:2px solid var(--acc);
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);}
+.dd-l{font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--acc);margin-bottom:.32rem;opacity:.8;}
+.dd-t{font-size:.82rem;color:var(--text);line-height:1.6;}
+.pss{padding:.8rem;border:1px solid var(--border);background:var(--bg);
+  position:relative;overflow:hidden;}
+/* Left accent bar on status boxes */
+.pss::before{content:'';position:absolute;top:0;left:0;
+  width:2px;height:100%;background:var(--acc);opacity:.6;}
+.pss-l{font-family:var(--mono);font-size:.56rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text-3);margin-bottom:.22rem;}
+.pss-v{font-family:var(--font);font-weight:800;font-size:1.4rem;
+  color:var(--acc);line-height:1;}
+
+/* ── EXPERTISE ── */
+.egrid{display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--border);margin-top:1.5rem;}
+.ei{background:var(--surface2);padding:1.4rem 1.3rem;
+  position:relative;overflow:hidden;transition:background .2s;
+  /* Angular cut on expertise cells */
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%);}
+.ei:hover{background:#1A1A1A;}
+/* Top border charges on hover */
+.ei::before{content:'';position:absolute;top:0;left:0;height:2px;
+  background:var(--acc);width:0;transition:width .35s ease;}
+.ei:hover::before{width:100%;}
+.ei::after{content:attr(data-n);position:absolute;bottom:-1rem;right:-.3rem;
+  font-family:var(--font);font-weight:900;font-size:5rem;
+  color:rgba(var(--acc-rgb),.04);line-height:1;pointer-events:none;}
+.ei-ic{font-size:1.2rem;margin-bottom:.7rem;display:block;}
+.ei-t{font-family:var(--font);font-weight:800;font-size:1.05rem;
+  color:var(--white);margin-bottom:.4rem;line-height:1.1;letter-spacing:-.01em;}
+.ei-d{font-size:.75rem;color:var(--text-2);line-height:1.6;}
+
+/* ── ACADEMIC ── */
+.alist{display:grid;gap:1px;background:var(--border);border:1px solid var(--border);}
+.ai{background:var(--surface);display:grid;grid-template-columns:60px 1fr auto;
+  gap:1.4rem;padding:1.3rem 1.5rem;align-items:start;
+  /* Animated left border charges on hover */
+  transition:background .2s,border-left-width .25s;
+  border-left:0 solid var(--acc);}
+.ai:hover{background:var(--surface2);border-left-width:4px;}
+.ay{font-family:var(--font);font-weight:900;font-size:1.6rem;
+  color:var(--acc);line-height:1;opacity:.6;}
+.arole{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--acc);margin-bottom:.28rem;}
+.at{font-family:var(--font);font-weight:700;font-size:1rem;
+  color:var(--white);margin-bottom:.28rem;}
+.ad{font-size:.78rem;color:var(--text-2);line-height:1.65;}
+.achips{display:flex;flex-wrap:wrap;gap:.28rem;margin-top:.5rem;}
+.ach{font-family:var(--mono);font-size:.54rem;letter-spacing:.07em;
+  text-transform:uppercase;padding:.15rem .45rem;
+  border:1px solid var(--border);color:var(--text-3);}
+/* Angular badge */
+.abadge{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;
+  text-transform:uppercase;padding:.25rem .6rem;
+  border:1px solid var(--acc);color:var(--acc);
+  white-space:nowrap;align-self:flex-start;
+  clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,0 100%);}
+
+/* ── PROCESS ── */
+.pgr{display:grid;grid-template-columns:1fr 1fr;
+  gap:1px;background:var(--border);border:1px solid var(--border);margin-top:1.5rem;}
+.ph2{background:var(--surface2);padding:1.7rem 1.5rem;
+  display:flex;flex-direction:column;gap:.7rem;
+  min-height:200px;position:relative;transition:background .2s;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);}
+.ph2::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:transparent;transition:background .3s;}
+.ph2:hover::before{background:var(--acc-dim);}
+.ph-ic{font-size:1.8rem;opacity:.35;}
+.ph-t{font-family:var(--font);font-weight:700;font-size:1.1rem;
+  color:var(--text-2);letter-spacing:-.01em;}
+.ph-d{font-size:.78rem;color:var(--text-3);line-height:1.65;}
+.ph-tip{font-family:var(--mono);font-size:.58rem;color:var(--acc);
+  letter-spacing:.08em;padding:.28rem .6rem;
+  border:1px solid var(--acc-dim);opacity:.75;
+  margin-top:auto;align-self:flex-start;}
+
+/* ── VISION ── */
+.vg{display:grid;grid-template-columns:1fr 1fr;
+  gap:clamp(2rem,4vw,5rem);align-items:center;}
+.vs{font-family:var(--font);font-weight:900;
+  font-size:clamp(1.8rem,3.5vw,3rem);color:var(--white);
+  line-height:1.05;letter-spacing:-.03em;}
+.vs em{color:var(--acc);font-style:normal;}
+.vd p{font-size:.85rem;color:var(--text-2);line-height:1.8;margin-bottom:.8rem;}
+.vd p strong{color:var(--text);font-weight:600;}
+
+/* ── CONTACT ── */
+.contact-slide{text-align:center;justify-content:center;}
+.chead{font-family:var(--font);font-weight:900;
+  font-size:clamp(2.5rem,6vw,5rem);color:var(--white);
+  line-height:.92;margin-bottom:1rem;letter-spacing:-.03em;}
+.csub{color:var(--text-2);font-size:.88rem;max-width:400px;
+  margin:0 auto 2rem;line-height:1.7;}
+.clinks{display:flex;justify-content:center;flex-wrap:wrap;gap:.7rem;}
+/* Angular clip on contact links */
+.cl{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text-2);
+  border:1px solid var(--border);padding:.5rem 1rem;
+  transition:border-color .2s,color .2s,transform .15s;
+  display:flex;align-items:center;gap:.4rem;
+  clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,0 100%);}
+.cl:hover{border-color:var(--acc);color:var(--acc);transform:translateX(3px);}
+
+/* ── PAPER FLOWER VIDEO BACKGROUND ── */
+#s-w3{position:relative;overflow:hidden;}
+
+/* Video element fills the entire section */
+#s-w3 .pf-video{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;z-index:0;
+  pointer-events:none;}
+
+/* Dim overlay — darkens video so text remains legible */
+#s-w3 .pf-dim{
+  position:absolute;inset:0;z-index:1;
+  background:rgba(0,0,0,.72);
+  pointer-events:none;}
+
+/* Vignette — radial shadow burning to black at the edges */
+#s-w3 .pf-vignette{
+  position:absolute;inset:0;z-index:2;
+  background:radial-gradient(
+    ellipse 80% 80% at 50% 50%,
+    transparent 30%,
+    rgba(0,0,0,.55) 65%,
+    rgba(0,0,0,.92) 100%);
+  pointer-events:none;}
+
+/* Ensure slide content sits above all video layers */
+#s-w3 .slide-lines,
+#s-w3 .sw,
+#s-w3 .da{position:relative;z-index:3;}
+#s-w3 .slide-telem{position:absolute;z-index:3;}
+
+
+/* ── COLOR KNITZY APP CARD ── */
+.knitzy-store-card{
+  display:flex;gap:1.1rem;align-items:center;
+  padding:1.2rem 1.3rem;
+  border:1px solid var(--border);background:var(--surface2);
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
+  transition:border-color .2s,background .2s;
+  text-decoration:none;color:inherit;cursor:none;position:relative;}
+.knitzy-store-card:hover{border-color:var(--acc);background:#1a1a1a;}
+/* Charge border on hover */
+.knitzy-store-card::before{content:'';position:absolute;top:0;left:0;
+  height:1px;width:0;background:var(--acc);transition:width .3s;}
+.knitzy-store-card:hover::before{width:100%;}
+
+.knitzy-icon{
+  width:72px;height:72px;flex-shrink:0;border-radius:16px;overflow:hidden;
+  background:linear-gradient(135deg,#ffcf6b,#c47d0e);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2rem;
+  box-shadow:0 4px 20px rgba(232,160,32,.25);}
+
+.knitzy-info{display:flex;flex-direction:column;gap:.25rem;flex:1;}
+.knitzy-title{font-family:var(--font);font-weight:900;font-size:1.05rem;
+  color:var(--white);letter-spacing:-.01em;}
+.knitzy-dev{font-family:var(--mono);font-size:.55rem;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--text-2);}
+.knitzy-platform{font-family:var(--mono);font-size:.52rem;
+  color:var(--acc);opacity:.7;letter-spacing:.08em;margin-top:.1rem;}
+.store-badges{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem;align-items:center;}
+.store-badges a{display:inline-flex;cursor:none;transition:opacity .15s;}
+.store-badges a:hover{opacity:.75;}
+.store-badges img{height:40px;width:auto;display:block;}
+/* Store stats row */
+.store-stats{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;margin-top:.35rem;}
+.store-stats span{font-family:var(--mono);font-size:.5rem;color:var(--text-2);letter-spacing:.05em;}
+.store-stats .ss-acc{color:var(--acc);}
+.store-stats .ss-sep{color:var(--text-3);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px){
+  .ph-grid,.proj-grid,.vg,.pps{grid-template-columns:1fr;}
+  .egrid{grid-template-columns:1fr 1fr;}
+  .ai{grid-template-columns:1fr;gap:.6rem;}
+  .pgr{grid-template-columns:1fr;}
+  .tl{display:none;}
+  body,a,.btn,.da,.dot{cursor:auto;}
+  .cur,.cur-r{display:none;}
+  .side-nav{display:none;}
+}
+@media(max-width:560px){.egrid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="cur" id="c"></div>
+<div class="cur-r" id="cr"></div>
+
+<nav class="topbar">
+  <div class="nav-logo">DCT — Portfolio</div>
+  <ul class="tl">
+    <li><a onclick="goTo(0)">Home</a></li>
+    <li><a onclick="goTo(1)">Philosophy</a></li>
+    <li><a onclick="goTo(2)">Work</a></li>
+    <li><a onclick="goTo(6)">Skills</a></li>
+    <li><a onclick="goTo(7)">Academic</a></li>
+    <li><a onclick="goTo(8)">Vision</a></li>
+    <li><a onclick="goTo(10)">Contact</a></li>
+  </ul>
+</nav>
+<div class="side-nav" id="sideNav"></div>
+<div class="slide-counter" id="ctr">01 / 11</div>
+
+<!-- 0: HERO -->
+<section class="slide" id="s-hero" data-label="Home">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="tacho"><div class="tacho-inner"></div></div>
+  <div class="sl-wrap">
+    <div class="sl"></div><div class="sl"></div>
+    <div class="sl"></div><div class="sl"></div><div class="sl"></div>
+  </div>
+  <div class="scan"></div>
+  <div class="hud">
+    LAP_1&nbsp;<span class="hv">ACTIVE ▶</span><br>
+    SECTOR&nbsp;<span class="hv">02:14.8</span><br>
+    STATUS&nbsp;<span class="hv">DESIGNING</span><br>
+    TEMP&nbsp;&nbsp;&nbsp;<span class="hv">42°C</span>
+  </div>
+  <div class="g-meter"></div>
+  <div class="sw">
+    <p class="hey">◼ Game Designer // Systems &amp; Gameplay // Hà Nội, Việt Nam</p>
+    <br>
+    <h1 class="hn">ĐẶNG<br><span>CÔNG THÀNH</span></h1>
+    <p class="htag">Design is not creativity in isolation. It is a discipline of analysis, iteration, and honest reckoning with failure. Every prototype is a lap. Every playtest is telemetry.</p>
+    <div class="hmeta">
+      <div><div class="hstat-n">4+</div><div class="hstat-l">Years Designing</div></div>
+      <div><div class="hstat-n">3</div><div class="hstat-l">Shipped Titles</div></div>
+      <div><div class="hstat-n">3</div><div class="hstat-l">Studios</div></div>
+      <div><div class="hstat-n">7.0</div><div class="hstat-l">IELTS</div></div>
+    </div>
+    <div class="hcta">
+      <a class="btn btn-a" onclick="goTo(2)">View Work →</a>
+      <a href="mailto:thanhdang210203@gmail.com" class="btn btn-b">Get in Touch</a>
+    </div>
+  </div>
+  <div class="da" onclick="goTo(1)"><div class="da-l"></div><span class="da-t">Next</span></div>
+</section>
+
+<!-- 1: TICKER -->
+<div class="ticker">
+  <div class="tick-inner">
+    <span class="tick-item">Systems Design<span class="sep"> ▶</span></span>
+    <span class="tick-item">Level Architecture<span class="sep"> ▶</span></span>
+    <span class="tick-item">VigaFun Studio<span class="sep"> ▶</span></span>
+    <span class="tick-item">Color Knitzy — Published<span class="sep"> ▶</span></span>
+    <span class="tick-item">Pixeldom: Pop Blast — Published<span class="sep"> ▶</span></span>
+    <span class="tick-item">Puzzle Drop Master — Published<span class="sep"> ▶</span></span>
+    <span class="tick-item">Narrative Integration<span class="sep"> ▶</span></span>
+    <span class="tick-item">IELTS 7.0<span class="sep"> ▶</span></span>
+    <span class="tick-item">BSc Hons CGDP<span class="sep"> ▶</span></span>
+    <span class="tick-item">GDD Authoring<span class="sep"> ▶</span></span>
+    <span class="tick-item">Playtesting &amp; Iteration<span class="sep"> ▶</span></span>
+    <span class="tick-item">Systems Design<span class="sep"> ▶</span></span>
+    <span class="tick-item">Level Architecture<span class="sep"> ▶</span></span>
+    <span class="tick-item">VigaFun Studio<span class="sep"> ▶</span></span>
+    <span class="tick-item">Color Knitzy — Published<span class="sep"> ▶</span></span>
+    <span class="tick-item">Pixeldom: Pop Blast — Published<span class="sep"> ▶</span></span>
+    <span class="tick-item">Puzzle Drop Master — Published<span class="sep"> ▶</span></span>
+    <span class="tick-item">Narrative Integration<span class="sep"> ▶</span></span>
+    <span class="tick-item">IELTS 7.0<span class="sep"> ▶</span></span>
+    <span class="tick-item">BSc Hons CGDP<span class="sep"> ▶</span></span>
+    <span class="tick-item">GDD Authoring<span class="sep"> ▶</span></span>
+    <span class="tick-item">Playtesting &amp; Iteration<span class="sep"> ▶</span></span>
+  </div>
+</div>
+
+<!-- 2: PHILOSOPHY -->
+<section class="slide" id="s-ph" data-label="Philosophy">
+  <div class="slide-lines"><div class="sline"></div><div class="sline"></div></div>
+  <div class="slide-telem">
+    SLIDE_02<br>SECTOR&nbsp;<span class="tv">PHILOSOPHY</span><br>
+    STATUS&nbsp;<span class="tv">ACTIVE</span>
+  </div>
+  <div class="sw">
+    <div class="lbl anim">Design Philosophy</div>
+    <div class="ph-grid anim-grid">
+      <div class="ph-q bracket">
+        <p class="q-vi">THẤT BẠI LÀ MẸ THÀNH CÔNG</p>
+        <p class="q-en">A Vietnamese saying that shaped how I approach every design problem. Not a phrase — a working method. Every iteration that fails teaches something a successful one cannot.</p>
+      </div>
+      <div class="ph-body">
+        <h3>I design by interrogating what broke, not celebrating what worked.</h3>
+        <p>My name, <strong>Công Thành</strong>, inverts the Vietnamese word for success — <strong>Thành Công</strong>. That contrast reflects how I think. Progress in design is built from effort, missteps, and honest reflection.</p>
+        <div class="pps">
+          <div class="pp"><div class="pp-n">01</div><div class="pp-t">Evidence First</div><div class="pp-d">Playtest data drives every adjustment. Gut instinct proposes; data decides.</div></div>
+          <div class="pp"><div class="pp-n">02</div><div class="pp-t">Remove Friction</div><div class="pp-d">Complexity is the last resort. The goal is always to reduce, not accumulate.</div></div>
+          <div class="pp"><div class="pp-n">03</div><div class="pp-t">Own the Process</div><div class="pp-d">When something fails, the question starts with the designer — never the team.</div></div>
+          <div class="pp"><div class="pp-n">04</div><div class="pp-t">Full-Cycle Awareness</div><div class="pp-d">Design decisions cannot be separated from production constraints. Know both.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="da" onclick="goTo(2)"><div class="da-l"></div><span class="da-t">Next</span></div>
+</section>
+
+<div class="finish"></div>
+
+<!-- 3: COLOR KNITZY -->
+<section class="slide" id="s-w1" data-label="Color Knitzy">
+  <div class="slide-lines"><div class="sline"></div><div class="sline"></div></div>
+  <div class="slide-telem">
+    SLIDE_03<br>SECTOR&nbsp;<span class="tv">WORK 01/04</span><br>
+    PROJECT&nbsp;<span class="tv">KNITZY</span>
+  </div>
+  <div class="sw">
+    <div class="lbl anim">Professional Work — 01/04</div>
+    <div class="proj-grid">
+      <div class="ps-l anim">
+        <p class="ptag"><span class="ptag-dot"></span>VigaFun · July 2025 – Present</p>
+        <h3 class="ptitle">Color<br>Knitzy</h3>
+        <p class="pstudio">Published Mobile Game · iOS &amp; Android</p>
+        <p class="pdesc">Led full level architecture, mechanic specification, and feature iteration across a live mobile title. Every level designed against a player-skill hypothesis, tested against live behavioural data, revised based on what analytics actually showed — not what seemed right in documentation.</p>
+        <div class="ptags"><span class="rt">Level Design</span><span class="rt">Systems Design</span><span class="rt">Mechanic Spec</span><span class="rt">Retention Analysis</span><span class="rt">GDD Authoring</span><span class="rt">Difficulty Curves</span></div>
+      </div>
+      <div class="ps-r anim">
+        <div class="knitzy-store-card bracket">
+          <div class="knitzy-icon"><img src="../Images/ColorKnitzy Icon.png" alt="Color Knitzy" style="width:100%;height:100%;object-fit:cover;border-radius:16px;"></div>
+          <div class="knitzy-info">
+            <div class="knitzy-title">Color Knitzy</div>
+            <div class="knitzy-dev">VigaFun Studio</div>
+            <div class="knitzy-platform">iOS &amp; Android</div>
+            <div class="store-stats">
+              <span class="ss-acc">★ 4.6</span><span class="ss-sep"> · </span>
+              <span>97.2K ratings</span><span class="ss-sep"> · </span>
+              <span>5M+ downloads</span>
+            </div>
+            <div class="store-badges">
+              <a href="https://play.google.com/store/apps/details?id=com.funfinity.knitzy.thread" target="_blank"><img src="../Images/Google_Play_Store_badge_EN.png" alt="Get it on Google Play"></a>
+              <a href="https://apps.apple.com/us/app/color-knitzy/id6745220785?l=vi" target="_blank"><img src="../Images/Download_on_the_App_Store_Badge.png" alt="Download on the App Store"></a>
+            </div>
+          </div>
+        </div>
+        <div class="dd race-card">
+          <p class="dd-l">↳ Key Design Decision &amp; Outcome</p>
+          <p class="dd-t">Playtest data showed drop-off around advertisement pacing interrupting flow states — not mechanic difficulty. Proposed restructuring ad timing within the session arc. Retention improved in subsequent live updates. Friction is almost always systemic, not mechanical.</p>
+        </div>
+        <div class="pss race-card">
+          <div class="pss-l">Status</div>
+          <div class="pss-v"><span class="live-dot"></span><span class="live-text">Published · Live</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="da" onclick="goTo(3)"><div class="da-l"></div><span class="da-t">Next</span></div>
+</section>
+
+<div class="finish"></div>
+
+<!-- 4: PIXELDOM: POP BLAST -->
+<section class="slide" id="s-w2" data-label="Pixeldom: Pop Blast">
+  <div class="slide-lines"><div class="sline"></div><div class="sline"></div></div>
+  <div class="slide-telem">
+    SLIDE_04<br>SECTOR&nbsp;<span class="tv">WORK 02/04</span><br>
+    PROJECT&nbsp;<span class="tv">PIXELDOM</span>
+  </div>
+  <div class="sw">
+    <div class="lbl anim">Professional Work — 02/04</div>
+    <div class="proj-grid">
+      <div class="ps-l anim">
+        <p class="ptag"><span class="ptag-dot"></span>VigaFun · 2025</p>
+        <h3 class="ptitle">Pixeldom:<br>Pop Blast</h3>
+        <p class="pstudio">Published Mobile Game · VigaFun Studio</p>
+        <p class="pdesc">Owned level progression architecture and mechanic documentation for a published pixel-art mobile title. Produced GDDs that served as the single authoritative production reference across design, engineering, and QA — eliminating interpretation gaps between disciplines during implementation.</p>
+        <div class="ptags"><span class="rt">Level Design</span><span class="rt">Feature Design</span><span class="rt">Progression Systems</span><span class="rt">GDD Authoring</span><span class="rt">QA Coordination</span></div>
+      </div>
+      <div class="ps-r anim">
+        <div class="knitzy-store-card bracket">
+          <div class="knitzy-icon"><img src="../Images/Pixeldom_Pop Blast.jpg" alt="Pixeldom: Pop Blast" style="width:100%;height:100%;object-fit:cover;border-radius:16px;"></div>
+          <div class="knitzy-info">
+            <div class="knitzy-title">Pixeldom: Pop Blast</div>
+            <div class="knitzy-dev">VigaFun Studio</div>
+            <div class="knitzy-platform">Android</div>
+            <div class="store-stats">
+              <span class="ss-acc">★ 4.2</span><span class="ss-sep"> · </span>
+              <span>546 ratings</span><span class="ss-sep"> · </span>
+              <span>10K+ downloads</span>
+            </div>
+            <div class="store-badges">
+              <a href="https://play.google.com/store/apps/details?id=com.vigafun.pixeldom.popblast" target="_blank"><img src="../Images/Google_Play_Store_badge_EN.png" alt="Get it on Google Play"></a>
+            </div>
+          </div>
+        </div>
+        <div class="dd race-card">
+          <p class="dd-l">↳ Design Responsibility</p>
+          <p class="dd-t">Calibrated challenge windows across multiple level tiers to sustain engagement without triggering frustration drop-off. Maintained design coherence between feature scope and technical constraints through structured GDD revision cycles.</p>
+        </div>
+        <div class="pss race-card">
+          <div class="pss-l">Status</div>
+          <div class="pss-v"><span class="live-dot"></span><span class="live-text">Published · Live</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="da" onclick="goTo(4)"><div class="da-l"></div><span class="da-t">Next</span></div>
+</section>
+
+<div class="finish"></div>
+
+<!-- 5: PUZZLE DROP MASTER -->
+<section class="slide" id="s-w4" data-label="Puzzle Drop Master">
+  <div class="slide-lines"><div class="sline"></div><div class="sline"></div></div>
+  <div class="slide-telem">
+    SLIDE_05<br>SECTOR&nbsp;<span class="tv">WORK 03/04</span><br>
+    PROJECT&nbsp;<span class="tv">PUZZLE DROP</span>
+  </div>
+  <div class="sw">
+    <div class="lbl anim">Professional Work — 03/04</div>
+    <div class="proj-grid">
+      <div class="ps-l anim">
+        <p class="ptag"><span class="ptag-dot"></span>VigaFun · 2025</p>
+        <h3 class="ptitle">Puzzle Drop<br>Master</h3>
+        <p class="pstudio">Published Mobile Game · iOS &amp; Android</p>
+        <p class="pdesc">Designed core puzzle mechanics and level progression for a published drop-puzzle mobile title. Focused on cognitive pacing and difficulty scaling across level tiers — ensuring each stage introduced new variables without overwhelming players or removing the satisfaction of mastery.</p>
+        <div class="ptags"><span class="rt">Puzzle Design</span><span class="rt">Level Design</span><span class="rt">Difficulty Scaling</span><span class="rt">Mechanic Spec</span><span class="rt">GDD Authoring</span></div>
+      </div>
+      <div class="ps-r anim">
+        <div class="knitzy-store-card bracket">
+          <div class="knitzy-icon"><img src="../Images/puzzle_drop_master.jpg" alt="Puzzle Drop Master" style="width:100%;height:100%;object-fit:cover;border-radius:16px;"></div>
+          <div class="knitzy-info">
+            <div class="knitzy-title">Puzzle Drop Master</div>
+            <div class="knitzy-dev">VigaFun Studio</div>
+            <div class="knitzy-platform">iOS &amp; Android</div>
+            <div class="store-stats">
+              <span>10K+ downloads</span>
+            </div>
+            <div class="store-badges">
+              <a href="https://play.google.com/store/apps/details?id=com.vigafun.colorflow" target="_blank"><img src="../Images/Google_Play_Store_badge_EN.png" alt="Get it on Google Play"></a>
+              <a href="https://apps.apple.com/us/app/puzzle-drop-master/id6762814588?l=vi#productRatings" target="_blank"><img src="../Images/Download_on_the_App_Store_Badge.png" alt="Download on the App Store"></a>
+            </div>
+          </div>
+        </div>
+        <div class="dd race-card">
+          <p class="dd-l">↳ Design Focus</p>
+          <p class="dd-t">Structured level progression to sustain player engagement across extended sessions. Pacing decisions were validated against early playtest behavioural data — adjusting challenge windows to reduce early drop-off without removing difficulty as a motivator.</p>
+        </div>
+        <div class="pss race-card">
+          <div class="pss-l">Status</div>
+          <div class="pss-v"><span class="live-dot"></span><span class="live-text">Published · Live</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="da" onclick="goTo(5)"><div class="da-l"></div><span class="da-t">Next</span></div>
+</section>
+
+<div class="finish"></div>
+
+<!-- 6: PAPER FLOWER -->
+<section class="slide" id="s-w3" data-label="Paper Flower">
+  <!-- Video background layers -->
+  <video class="pf-video" autoplay loop muted playsinline preload="auto">
+    <source src="../Video/Trailer_HoaDang_final_1.mp4" type="video/mp4">
+  </video>
+  <div class="pf-dim"></div>
+  <div class="pf-vignette"></div>
+
+  <div class="slide-lines"><div class="sline"></div><div class="sline"></div></div>
+  <div class="slide-telem">
+    SLIDE_06<br>SECTOR&nbsp;<span class="tv">WORK 04/04</span><br>
+    PROJECT&nbsp;<span class="tv">PAPER FLOWER</span>
+  </div>
+  <div class="sw">
+    <div class="lbl anim">Professional Work — 04/04</div>
+    <div class="proj-grid">
+      <div class="ps-l anim">
+        <p class="ptag"><span class="ptag-dot"></span>LacBird.co · Dec 2023 – Apr 2024</p>
+        <h3 class="ptitle">Paper<br>Flower</h3>
+        <p class="pstudio">Narrative Game · LacBird.co Studio</p>
+        <p class="pdesc">First professional project — and the one that clarified the gap between capability and preparation. Served as narrative designer and unexpected project lead for a four-person team. Scope failed. Communication broke down. The project stalled under my leadership. Taking full ownership of that changed every decision I have made since.</p>
+        <div class="ptags"><span class="rt">Narrative Design</span><span class="rt">Project Lead</span><span class="rt">Story Integration</span><span class="rt">Team Coordination</span></div>
+      </div>
+      <div class="ps-r anim">
+        <div class="dd race-card">
+          <p class="dd-l">↳ Turning Point</p>
+          <p class="dd-t">I stopped treating the failure as the team's problem the moment I recognised it as a leadership and preparation failure. Taking ownership — rather than distributing blame — was the most significant professional development of my early career.</p>
+        </div>
+        <div class="pss race-card"><div class="pss-l">Key Lesson</div><div class="pss-v" style="font-size:.9rem;color:var(--text)">Ownership over Blame</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="da" onclick="goTo(6)"><div class="da-l"></div><span class="da-t">Next</span></div>
+</section>
+
+<div class="finish"></div>
+
+<!-- 6: SKILLS -->
+<section class="slide" id="s-exp" data-label="Skills">
+  <div class="slide-lines"><div class="sline"></div><div class="sline"></div></div>
+  <div class="slide-telem">SLIDE_07<br>SECTOR&nbsp;<span class="tv">SKILLS</span></div>
+  <div class="sw">
+    <div class="lbl anim">Disciplines</div>
+    <h2 class="st anim" style="margin-bottom:1rem;">DESIGN<br>EXPERTISE</h2>
+    <div class="egrid anim-grid">
+      <div class="ei" data-n="01"><span class="ei-ic">⬡</span><h3 class="ei-t">Systems &amp; Gameplay</h3><p class="ei-d">Connecting mechanics, player psychology, and experience goals. Difficulty architecture, feature interdependency, player learning trajectories.</p></div>
+      <div class="ei" data-n="02"><span class="ei-ic">◈</span><h3 class="ei-t">Level Design</h3><p class="ei-d">Spaces that teach without telling. Mobile and narrative environments. Spatial composition, cognitive pacing, challenge calibration.</p></div>
+      <div class="ei" data-n="03"><span class="ei-ic">◎</span><h3 class="ei-t">Narrative Integration</h3><p class="ei-d">Story that serves mechanics. Player agency, responsive narrative, emotional context for mechanical choices without interrupting play.</p></div>
+      <div class="ei" data-n="04"><span class="ei-ic">▤</span><h3 class="ei-t">Design Documentation</h3><p class="ei-d">GDDs that function as living production references — specs, feature briefs, iteration logs engineers and artists can act on directly.</p></div>
+      <div class="ei" data-n="05"><span class="ei-ic">◐</span><h3 class="ei-t">Playtesting &amp; Iteration</h3><p class="ei-d">Hypothesis-driven iteration from structured observation and live data. Testing a specific claim about player behaviour — not adjusting from intuition.</p></div>
+      <div class="ei" data-n="06"><span class="ei-ic">△</span><h3 class="ei-t">Creative Direction</h3><p class="ei-d">Direction, cinematography, narrative structure across film and trailer work. Cross-medium sensibility that informs attention control and experience pacing.</p></div>
+    </div>
+  </div>
+  <div class="da" onclick="goTo(7)"><div class="da-l"></div><span class="da-t">Next</span></div>
+</section>
+
+<div class="finish"></div>
+
+<!-- 7: ACADEMIC -->
+<section class="slide" id="s-ac" data-label="Academic">
+  <div class="slide-lines"><div class="sline"></div><div class="sline"></div></div>
+  <div class="slide-telem">SLIDE_08<br>SECTOR&nbsp;<span class="tv">ACADEMIC</span></div>
+  <div class="sw">
+    <div class="lbl anim">Academic &amp; Extracurricular</div>
+    <h2 class="st anim" style="margin-bottom:1rem;">BUILT UNDER<br>CONSTRAINT</h2>
+    <div class="alist anim">
+      <div class="ai"><div class="ay">23</div><div><p class="arole">Game Designer · BUV Game Jam 2023</p><h4 class="at">BUV Game Jam 2023 — Sole Designer</h4><p class="ad">Every mechanic decision, scope boundary, and QC call was mine alone under a fixed-time constraint. Produced a complete playable prototype through rapid prototyping discipline and ruthless scope management.</p><div class="achips"><span class="ach">Rapid Prototyping</span><span class="ach">Scope Management</span><span class="ach">Solo Decisions</span><span class="ach">QC Under Pressure</span></div></div><span class="abadge">Game Jam</span></div>
+      <div class="ai"><div class="ay">22</div><div><p class="arole">Designer &amp; Programmer · BUV Game Jam 2022</p><h4 class="at">BUV Game Jam 2022 — Dual Role</h4><p class="ad">Carried both design and programming simultaneously. Learned that design decisions have implementation costs — understanding those costs before committing is not optional at any production scale.</p><div class="achips"><span class="ach">Cross-Discipline</span><span class="ach">Rapid Iteration</span><span class="ach">GDD Writing</span><span class="ach">Time-Constrained Design</span></div></div><span class="abadge">Game Jam</span></div>
+      <div class="ai"><div class="ay">24</div><div><p class="arole">Director &amp; Producer · Final Year</p><h4 class="at">"A Journey to Peace" — Short Film</h4><p class="ad">End-to-end creative direction: script, cinematography, actor direction, editorial pacing. Film and game design share structural logic — both control attention and manage emotional pacing across a designed timeline.</p><div class="achips"><span class="ach">Creative Direction</span><span class="ach">Screenwriting</span><span class="ach">Pacing &amp; Structure</span><span class="ach">Production Leadership</span></div></div><span class="abadge">Film</span></div>
+      <div class="ai"><div class="ay">23</div><div><p class="arole">Event Organiser · BUV Photography Club</p><h4 class="at">Catch Your Glimpse — Photography Event</h4><p class="ad">Full coordination of a campus public event: logistics, team communication, creative direction, and execution. Translating creative vision into organised sequential production steps — project management for designers.</p><div class="achips"><span class="ach">Event Coordination</span><span class="ach">Cross-Team Communication</span><span class="ach">Creative Direction</span></div></div><span class="abadge">Event</span></div>
+    </div>
+  </div>
+  <div class="da" onclick="goTo(8)"><div class="da-l"></div><span class="da-t">Next</span></div>
+</section>
+
+<div class="finish"></div>
+
+<!-- 8: PROCESS -->
+<section class="slide" id="s-process" data-label="Process">
+  <div class="slide-lines"><div class="sline"></div><div class="sline"></div></div>
+  <div class="slide-telem">SLIDE_09<br>SECTOR&nbsp;<span class="tv">PROCESS</span></div>
+  <div class="sw">
+    <div class="lbl anim">Design Process Documentation</div>
+    <h2 class="st anim" style="margin-bottom:.7rem;">HOW I<br>THINK</h2>
+    <p class="anim" style="color:var(--text-2);font-size:.85rem;line-height:1.75;max-width:580px;margin-bottom:1.2rem;">Reserved for process documentation — how designs were developed, not just what they became.</p>
+    <div class="pgr anim-grid">
+      <div class="ph2 bracket"><span class="ph-ic">📄</span><p class="ph-t">Game Design Documents</p><p class="ph-d">GDDs from Color Knitzy, Pixel Dom, or Paper Flower. A 4–6 page mechanic specification with annotated diagrams shows what you designed, variables involved, and edge cases considered.</p><span class="ph-tip">↳ Critical for postgraduate portfolio evidence</span></div>
+      <div class="ph2 bracket"><span class="ph-ic">🎬</span><p class="ph-t">Gameplay Videos</p><p class="ph-d">Footage of shipped titles, prototype demos, or gameplay walkthroughs. Seeing design decisions in motion converts described competency into demonstrated competency.</p><span class="ph-tip">↳ Embed YouTube / Vimeo links</span></div>
+      <div class="ph2 bracket"><span class="ph-ic">🔁</span><p class="ph-t">Iteration Logs</p><p class="ph-d">A single mechanic across three iterations: original design, what the playtest revealed, what you changed, and why. This one exercise shows design thinking more clearly than any polished portfolio piece.</p><span class="ph-tip">↳ Shows structured design thinking</span></div>
+      <div class="ph2 bracket"><span class="ph-ic">📐</span><p class="ph-t">System Diagrams</p><p class="ph-d">Mechanic dependency maps, difficulty curves, player decision flowcharts. Shows the ability to model design logic structurally — communicates systems literacy at a glance.</p><span class="ph-tip">↳ Demonstrates systems design vocabulary</span></div>
+    </div>
+  </div>
+  <div class="da" onclick="goTo(9)"><div class="da-l"></div><span class="da-t">Next</span></div>
+</section>
+
+<!-- CHECKERED between Design Process → Direction (as requested) -->
+<div class="finish"></div>
+
+<!-- 9: VISION -->
+<section class="slide" id="s-vision" data-label="Vision">
+  <div class="slide-lines"><div class="sline"></div><div class="sline"></div></div>
+  <div class="slide-telem">SLIDE_10<br>SECTOR&nbsp;<span class="tv">DIRECTION</span></div>
+  <div class="sw">
+    <div class="lbl anim">Direction</div>
+    <div class="vg">
+      <div class="vs anim">Design at the<br>highest level.<br><em>Build something<br>worth pointing at.</em></div>
+      <div class="vd anim">
+        <p>The games industry I work in is shaped by mobile market constraints — short sessions, aggressive monetisation, extremely low friction tolerance. Working within those constraints has made me a more disciplined designer. But discipline applied to a constrained context eventually hits a ceiling.</p>
+        <p>The next stage requires operating in an environment where design is tested not just against retention dashboards, but against the full weight of <strong>craft, research, and production rigour</strong>. That shift — from surviving constraints to setting standards — is what drives the direction I am heading.</p>
+        <p>The goal is a <strong>higher level of practice</strong> — one where I can contribute to shaping what serious game design looks like in a market that is only beginning to ask that question.</p>
+        <a class="btn btn-a" onclick="goTo(11)" style="margin-top:1rem;display:inline-flex;">Get in Touch →</a>
+      </div>
+    </div>
+  </div>
+  <div class="da" onclick="goTo(11)"><div class="da-l"></div><span class="da-t">Next</span></div>
+</section>
+
+<div class="finish"></div>
+
+<!-- 10: CONTACT -->
+<section class="slide contact-slide" id="s-contact" data-label="Contact">
+  <div class="slide-telem" style="text-align:right;">SLIDE_11<br>SECTOR&nbsp;<span class="tv">CONTACT</span></div>
+  <div class="sw" style="text-align:center;">
+    <div class="lbl anim" style="justify-content:center;">Contact</div>
+    <h2 class="chead anim">GET IN<br>TOUCH</h2>
+    <p class="csub anim">Open to collaborations, postgraduate enquiries, and conversations about game design and the Vietnamese games industry.</p>
+    <div class="clinks anim">
+      <a href="mailto:thanhdang210203@gmail.com" class="cl"><span>✉</span>thanhdang210203@gmail.com</a>
+      <a href="https://linkedin.com/in/dangcongthanh" target="_blank" class="cl"><span>↗</span>LinkedIn</a>
+      <a href="https://linktr.ee/thanhdang2102" target="_blank" class="cl"><span>↗</span>Linktree</a>
+      <a href="https://500px.com/p/thanhhdang" target="_blank" class="cl"><span>↗</span>Photography</a>
+    </div>
+    <p class="anim" style="font-family:var(--mono);font-size:.6rem;color:var(--text-3);letter-spacing:.08em;margin-top:2rem;">© 2025 Đặng Công Thành · Hà Nội, Việt Nam · IELTS 7.0</p>
+  </div>
+</section>
+
+<script>
+/* ── Crosshair cursor ── */
+const c=document.getElementById('c'),cr=document.getElementById('cr');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  if(c){c.style.left=mx+'px';c.style.top=my+'px';}
+});
+(function loop(){
+  rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
+  if(cr){cr.style.left=rx+'px';cr.style.top=ry+'px';}
+  requestAnimationFrame(loop);
+})();
+if(cr){
+  document.querySelectorAll('a,button,.da').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cr.style.width='50px';cr.style.height='50px';cr.style.opacity='.4';});
+    el.addEventListener('mouseleave',()=>{cr.style.width='38px';cr.style.height='38px';cr.style.opacity='.22';});
+  });
+}
+
+/* ── Slide engine ── */
+const slides=[...document.querySelectorAll('.slide')];
+const total=slides.length;
+const sn=document.getElementById('sideNav');
+const ctr=document.getElementById('ctr');
+let current=0;
+
+slides.forEach((_,i)=>{
+  const d=document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  d.onclick=()=>goTo(i);
+  sn.appendChild(d);
+});
+
+function goTo(i){
+  current=Math.max(0,Math.min(i,total-1));
+  slides[current].scrollIntoView({behavior:'smooth'});
+}
+function upd(){
+  sn.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===current));
+  ctr.textContent=String(current+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');
+}
+
+/* ── Intersection observer ── */
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting&&e.intersectionRatio>.4){
+      current=slides.indexOf(e.target);
+      upd();
+      /* slide left-border + telemetry reveal */
+      e.target.classList.add('in-view');
+      /* content entry animations */
+      e.target.querySelectorAll('.anim').forEach((el,idx)=>{
+        setTimeout(()=>el.classList.add('in'),idx*70);
+      });
+      e.target.querySelectorAll('.anim-grid').forEach(el=>{
+        setTimeout(()=>el.classList.add('in'),50);
+      });
+    }
+  });
+},{threshold:.4});
+slides.forEach(s=>io.observe(s));
+
+/* ── Keyboard ── */
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'||e.key==='PageDown')goTo(current+1);
+  if(e.key==='ArrowUp'||e.key==='PageUp')goTo(current-1);
+});
+</script>
+</body>
+</html>
