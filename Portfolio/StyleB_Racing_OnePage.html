@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đặng Công Thành — Game Designer</title>
+<!--
+╔══════════════════════════════════════════════════════════════╗
+║  STYLE B — ONE-PAGER  ·  "APEX" RACING HUD THEME            ║
+║                                                              ║
+║  Aesthetic: Night race telemetry board. Deep black with      ║
+║  high-contrast crimson (#E8001C) — F1 start light red.       ║
+║  Speed lines, diagonal cuts, HUD data overlays, tachometer   ║
+║  arc decorations. Typography is pure aggression:             ║
+║  Bebas Neue for display, Be Vietnam Pro for body text.        ║
+║                                                              ║
+║  Why this works: Your personal statement opens with a        ║
+║  racing metaphor. This design makes that metaphor the        ║
+║  visual language — every visitor understands immediately     ║
+║  that you think in laps, data, and precise iteration.        ║
+║  It is distinctive, memorable, and coherent.                 ║
+╚══════════════════════════════════════════════════════════════╝
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060608;--surface:#0C0C10;--surface2:#121218;--border:#1E1E28;
+  --red:#E8001C;--red-dim:#7A000F;--red-glow:rgba(232,0,28,.12);
+  --white:#F0EEF8;--text:#C8C6D4;--text-2:#7A7888;--text-3:#3A3848;
+  --font-d:'Bebas Neue',sans-serif;--font:'Be Vietnam Pro',sans-serif;--mono:'DM Mono',monospace;
+  --max:1200px;--pad:clamp(1.5rem,5vw,4rem);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--font);
+  font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;cursor:none;
+}
+a{color:inherit;text-decoration:none;cursor:none;}
+
+/* Speed line background texture */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    repeating-linear-gradient(
+      -15deg,
+      transparent,
+      transparent 80px,
+      rgba(232,0,28,.012) 80px,
+      rgba(232,0,28,.012) 81px
+    );
+}
+/* Grain */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.3;
+}
+
+/* Custom cursor — crosshair */
+.cur{
+  position:fixed;width:20px;height:20px;pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+}
+.cur::before,.cur::after{content:'';position:absolute;background:var(--red);}
+.cur::before{width:2px;height:20px;left:9px;top:0;}
+.cur::after{width:20px;height:2px;top:9px;left:0;}
+.cur-r{
+  position:fixed;width:40px;height:40px;border:1px solid var(--red);pointer-events:none;
+  z-index:9997;transform:translate(-50%,-50%);opacity:.25;
+  transition:width .18s,height .18s,opacity .18s;
+}
+
+/* NAV — HUD style */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1rem var(--pad);
+  background:rgba(6,6,8,.95);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(8px);
+}
+nav::after{content:'';position:absolute;bottom:0;left:var(--pad);right:var(--pad);height:1px;background:linear-gradient(90deg,var(--red),transparent 40%);}
+.nav-logo{
+  font-family:var(--font-d);font-size:1.4rem;color:var(--red);letter-spacing:.08em;
+  display:flex;align-items:center;gap:.6rem;
+}
+.nav-logo::before{content:'▶';font-size:.9rem;animation:blink 1.2s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{
+  font-family:var(--mono);font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text-2);transition:color .15s;
+  display:flex;align-items:center;gap:.4rem;
+}
+.nav-links a::before{content:'';width:4px;height:4px;background:currentColor;border-radius:50%;opacity:.5;}
+.nav-links a:hover{color:var(--red);}
+
+/* SECTIONS */
+section{padding:clamp(5rem,10vw,8rem) var(--pad);position:relative;}
+.wrap{max-width:var(--max);margin:0 auto;}
+
+/* Section label */
+.lbl{
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--red);margin-bottom:.8rem;display:flex;align-items:center;gap:.6rem;
+}
+.lbl::before{content:'//';opacity:.5;}
+.lbl::after{content:'';display:block;height:1px;width:32px;background:var(--red);opacity:.4;}
+
+/* Big headings */
+h2.st{
+  font-family:var(--font-d);
+  font-size:clamp(3rem,5.5vw,5rem);
+  line-height:.9;color:var(--white);letter-spacing:.03em;
+}
+
+/* Diagonal section divider */
+.diagonal{
+  position:absolute;bottom:-1px;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--red) 0%,var(--red) 30%,transparent 30%);
+}
+
+/* Reveal */
+.rv{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease;}
+.rv.in{opacity:1;transform:none;}
+
+/* ── HERO ── */
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:5rem;overflow:hidden;}
+
+/* Tachometer arc decoration */
+.tacho{
+  position:absolute;top:-15%;right:-8%;width:65%;padding-bottom:65%;
+  border:1px solid rgba(232,0,28,.08);border-radius:50%;
+  animation:tacho-pulse 4s ease-in-out infinite alternate;
+}
+.tacho::before{
+  content:'';position:absolute;inset:8%;
+  border:1px solid rgba(232,0,28,.05);border-radius:50%;
+}
+.tacho::after{
+  content:'';position:absolute;inset:16%;
+  border:1px solid rgba(232,0,28,.06);border-radius:50%;
+}
+@keyframes tacho-pulse{from{opacity:.5;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
+
+/* Speed lines */
+.speed-lines{
+  position:absolute;inset:0;overflow:hidden;pointer-events:none;
+}
+.sl{
+  position:absolute;height:1px;background:linear-gradient(90deg,transparent,rgba(232,0,28,.15),transparent);
+  animation:sl-move 3s linear infinite;
+  opacity:0;
+}
+.sl:nth-child(1){top:20%;width:40%;left:-40%;animation-delay:0s;}
+.sl:nth-child(2){top:35%;width:60%;left:-60%;animation-delay:.4s;}
+.sl:nth-child(3){top:55%;width:35%;left:-35%;animation-delay:.8s;}
+.sl:nth-child(4){top:70%;width:50%;left:-50%;animation-delay:1.2s;}
+.sl:nth-child(5){top:82%;width:45%;left:-45%;animation-delay:1.8s;}
+@keyframes sl-move{
+  0%{opacity:0;transform:translateX(0);}
+  10%{opacity:1;}
+  90%{opacity:.6;}
+  100%{opacity:0;transform:translateX(calc(100vw + 100%));}
+}
+
+/* HUD data overlay */
+.hud-data{
+  position:absolute;top:6rem;right:var(--pad);
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;
+  color:var(--text-3);line-height:2;text-align:right;
+  animation:fu .8s .5s both;
+}
+.hud-data span{color:var(--red);opacity:.6;}
+
+.hc{position:relative;z-index:1;max-width:var(--max);margin:0 auto;width:100%;}
+.hey{font-family:var(--mono);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--red);margin-bottom:1.2rem;opacity:0;animation:fu .8s .2s forwards;}
+.hn{
+  font-family:var(--font-d);
+  font-size:clamp(4.5rem,14vw,13rem);
+  line-height:.85;color:var(--white);margin-bottom:1.4rem;
+  opacity:0;animation:fu .9s .35s forwards;letter-spacing:.04em;
+}
+.hn span{
+  color:transparent;-webkit-text-stroke:1px var(--red);
+  display:block;
+}
+/* Red underline accent on name */
+.hn::after{content:'';display:block;width:120px;height:3px;background:var(--red);margin-top:.5rem;}
+
+.htag{
+  font-size:clamp(.9rem,1.6vw,1.1rem);font-weight:300;color:var(--text-2);
+  max-width:480px;line-height:1.65;
+  border-left:2px solid var(--red);padding-left:1.1rem;
+  opacity:0;animation:fu .9s .55s forwards;
+}
+.hmeta{display:flex;gap:2rem;flex-wrap:wrap;margin-top:2rem;opacity:0;animation:fu .9s .7s forwards;}
+.hstat-n{font-family:var(--font-d);font-size:2.2rem;color:var(--red);line-height:1;}
+.hstat-l{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--white);margin-top:.1rem;}
+.hcta{display:flex;gap:.8rem;margin-top:2rem;flex-wrap:wrap;opacity:0;animation:fu .9s .85s forwards;}
+
+@keyframes fu{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+
+.btn{padding:.7rem 1.6rem;font-family:var(--mono);font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;border:none;cursor:none;transition:transform .12s,background .18s,color .18s,border-color .18s;display:inline-flex;align-items:center;gap:.5rem;}
+.btn-a{background:var(--red);color:#fff;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);}
+.btn-a:hover{background:#FF1A30;transform:translateX(3px);}
+.btn-b{background:transparent;color:var(--text);border:1px solid var(--border);}
+.btn-b:hover{border-color:var(--red);color:var(--red);transform:translateX(3px);}
+
+/* Checkered finish line divider */
+.finish{height:8px;background:repeating-linear-gradient(90deg,var(--border) 0,var(--border) 10px,var(--surface) 10px,var(--surface) 20px);opacity:.4;}
+
+/* ── LAP STAT TICKER ── */
+.ticker{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:.7rem var(--pad);overflow:hidden;position:relative;}
+.ticker-inner{display:flex;gap:3rem;animation:tick 20s linear infinite;white-space:nowrap;}
+.ticker-inner:hover{animation-play-state:paused;}
+.tick-item{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);display:flex;align-items:center;gap:.5rem;white-space:nowrap;}
+.tick-item span{color:var(--red);}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── PHILOSOPHY ── */
+#philosophy{background:var(--surface);border-top:1px solid var(--border);}
+.ph-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,4vw,5rem);align-items:start;}
+.ph-q{
+  padding:2rem;position:relative;
+  background:var(--surface2);
+  clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%);
+}
+.ph-q::before{
+  content:'"';position:absolute;top:-.4rem;left:1rem;
+  font-family:var(--font-d);font-size:5rem;color:var(--red);line-height:1;opacity:.7;
+}
+.ph-q::after{content:'';position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 16px 16px 0;border-color:transparent var(--bg) transparent transparent;}
+.q-vi{font-size:1.2rem;font-weight:300;color:var(--red);font-style:italic;margin:.9rem 0 .6rem;}
+.q-en{font-size:.82rem;color:var(--text-2);border-top:1px solid var(--border);padding-top:.6rem;line-height:1.7;}
+.ph-body h3{font-family:var(--font-d);font-size:clamp(1.8rem,2.8vw,2.4rem);color:var(--white);line-height:1;margin-bottom:1rem;letter-spacing:.02em;}
+.ph-body p{font-size:.88rem;color:var(--text-2);line-height:1.8;margin-bottom:.8rem;}
+.ph-body p strong{color:var(--text);font-weight:600;}
+.pps{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:1.2rem;}
+.pp{
+  padding:.85rem 1rem;border:1px solid var(--border);border-top:2px solid var(--red);
+  background:var(--bg);
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%);
+}
+.pp-n{font-family:var(--mono);font-size:.56rem;color:var(--red);letter-spacing:.1em;margin-bottom:.25rem;}
+.pp-t{font-size:.8rem;font-weight:700;color:var(--white);margin-bottom:.18rem;}
+.pp-d{font-size:.7rem;color:var(--text-2);line-height:1.5;}
+
+/* ── WORK ── */
+#work{background:var(--bg);}
+.wi{display:grid;grid-template-columns:1fr 1.5fr;gap:var(--pad);margin-bottom:2.5rem;align-items:end;}
+.wi p{font-size:.88rem;color:var(--text-2);line-height:1.8;}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--border);border:2px solid var(--border);}
+.pc{
+  background:var(--surface);padding:clamp(1.4rem,2.5vw,2rem);
+  position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:290px;
+  transition:background .2s;
+}
+.pc:hover{background:var(--surface2);}
+/* Diagonal cut on cards */
+.pc::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:transparent;transition:background .2s;
+}
+.pc:hover::after{background:var(--red);}
+.pc.feat{grid-column:1/-1;flex-direction:row;gap:2rem;min-height:240px;}
+.ptag{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--red);margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem;}
+.ptag-dot{width:5px;height:5px;background:var(--red);border-radius:0;}/* Square dot for racing */
+.ptitle{font-family:var(--font-d);font-size:clamp(1.8rem,3vw,2.8rem);color:var(--white);line-height:.95;margin-bottom:.3rem;letter-spacing:.03em;}
+.pstudio{font-family:var(--mono);font-size:.6rem;color:var(--text-3);margin-bottom:1rem;}
+.pdesc{font-size:.83rem;color:var(--text-2);line-height:1.75;flex:1;margin-bottom:1rem;}
+.dd{padding:.85rem 1rem;background:rgba(232,0,28,.06);border-left:2px solid var(--red);margin-top:auto;}
+.dd-l{font-family:var(--mono);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--red);margin-bottom:.3rem;opacity:.8;}
+.dd-t{font-size:.78rem;color:var(--text);line-height:1.6;}
+.ptags{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.8rem;}
+.rt{font-family:var(--mono);font-size:.55rem;letter-spacing:.07em;text-transform:uppercase;padding:.18rem .48rem;border:1px solid var(--border);color:var(--text-2);}
+.pm{flex:1;}
+.ps2{width:250px;flex-shrink:0;display:flex;flex-direction:column;gap:.7rem;}
+.pss{padding:.8rem;border:1px solid var(--border);background:var(--bg);position:relative;overflow:hidden;}
+.pss::before{content:'';position:absolute;top:0;left:0;width:2px;height:100%;background:var(--red);opacity:.5;}
+.pss-l{font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:.2rem;}
+.pss-v{font-family:var(--font-d);font-size:1.5rem;color:var(--red);line-height:1;letter-spacing:.03em;}
+
+/* ── EXPERTISE ── */
+#exp{background:var(--surface);border-top:1px solid var(--border);}
+.egrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-top:2rem;}
+.ei{
+  background:var(--surface2);padding:1.6rem 1.4rem;
+  position:relative;overflow:hidden;transition:background .2s;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%);
+}
+.ei:hover{background:#161620;}
+.ei::after{content:attr(data-n);position:absolute;bottom:-1rem;right:-.3rem;font-family:var(--font-d);font-size:5.5rem;color:rgba(232,0,28,.04);line-height:1;pointer-events:none;}
+.ei-ic{font-size:1.3rem;margin-bottom:.7rem;display:block;}
+.ei-t{font-family:var(--font-d);font-size:1.3rem;color:var(--white);margin-bottom:.4rem;letter-spacing:.02em;}
+.ei-d{font-size:.78rem;color:var(--text-2);line-height:1.6;}
+
+/* ── ACADEMIC ── */
+#ac{background:var(--bg);}
+.alist{display:grid;grid-template-columns:1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-top:2rem;}
+.ai{
+  background:var(--surface);display:grid;grid-template-columns:68px 1fr auto;
+  gap:1.5rem;padding:1.4rem 1.6rem;align-items:start;transition:background .2s;
+  border-left:0 solid var(--red);transition:background .2s,border-left-width .2s;
+}
+.ai:hover{background:var(--surface2);border-left-width:3px;}
+.ay{font-family:var(--font-d);font-size:1.8rem;color:var(--red);line-height:1;opacity:.6;letter-spacing:.03em;}
+.arole{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:.3rem;}
+.at{font-family:var(--font);font-weight:700;font-size:1rem;color:var(--white);margin-bottom:.3rem;}
+.ad{font-size:.8rem;color:var(--text-2);line-height:1.7;max-width:520px;}
+.achips{display:flex;flex-wrap:wrap;gap:.28rem;margin-top:.5rem;}
+.ach{font-family:var(--mono);font-size:.52rem;letter-spacing:.07em;text-transform:uppercase;padding:.15rem .43rem;border:1px solid var(--border);color:var(--text-3);}
+.abadge{font-family:var(--mono);font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;padding:.24rem .58rem;border:1px solid var(--red);color:var(--red);white-space:nowrap;align-self:flex-start;}
+
+/* ── PROCESS ── */
+#process{background:var(--surface);border-top:1px solid var(--border);}
+.pgr{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-top:2rem;}
+.ph{
+  background:var(--surface2);padding:2rem 1.6rem;display:flex;flex-direction:column;
+  gap:.7rem;min-height:230px;position:relative;transition:background .2s;
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);
+}
+.ph:hover{background:#131320;}
+.ph::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:transparent;transition:background .3s;}
+.ph:hover::before{background:var(--red-dim);}
+.ph-ic{font-size:1.8rem;opacity:.3;margin-bottom:.1rem;}
+.ph-t{font-family:var(--font-d);font-size:1.3rem;color:var(--text-2);letter-spacing:.02em;}
+.ph-d{font-size:.78rem;color:var(--text-3);line-height:1.65;}
+.ph-tip{font-family:var(--mono);font-size:.58rem;color:var(--red);letter-spacing:.08em;padding:.25rem .6rem;border:1px solid var(--red-dim);opacity:.7;margin-top:auto;align-self:flex-start;}
+
+/* ── VISION ── */
+#vision{
+  background:var(--bg);
+  position:relative;overflow:hidden;
+}
+#vision::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 80% 50%,rgba(232,0,28,.04) 0%,transparent 55%);
+  pointer-events:none;
+}
+.vg{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,4vw,5rem);align-items:center;}
+.vs{
+  font-family:var(--font-d);font-size:clamp(2.2rem,4.5vw,4rem);
+  color:var(--white);line-height:.95;letter-spacing:.03em;
+}
+.vs em{color:var(--red);font-style:normal;display:block;}
+.vd p{font-size:.86rem;color:var(--text-2);line-height:1.8;margin-bottom:.85rem;}
+.vd p strong{color:var(--text);font-weight:600;}
+
+/* ── CONTACT ── */
+#contact{background:var(--surface);border-top:1px solid var(--border);text-align:center;}
+.chead{font-family:var(--font-d);font-size:clamp(3rem,7vw,6rem);color:var(--white);line-height:.9;margin-bottom:1rem;letter-spacing:.04em;}
+.csub{color:var(--text-2);font-size:.88rem;max-width:400px;margin:0 auto 2rem;line-height:1.7;}
+.clinks{display:flex;justify-content:center;flex-wrap:wrap;gap:.7rem;margin-bottom:2.5rem;}
+.cl{
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text-2);border:1px solid var(--border);padding:.5rem 1rem;
+  transition:border-color .2s,color .2s;display:flex;align-items:center;gap:.4rem;
+  clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,0 100%);
+}
+.cl:hover{border-color:var(--red);color:var(--red);}
+footer{background:var(--bg);border-top:1px solid var(--border);padding:1.2rem var(--pad);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;}
+footer p{font-family:var(--mono);font-size:.56rem;color:var(--text-3);letter-spacing:.07em;}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .ph-grid,.wi,.vg{grid-template-columns:1fr;}
+  .pgrid{grid-template-columns:1fr;}
+  .pc.feat{flex-direction:column;}
+  .ps2{width:100%;}
+  .egrid{grid-template-columns:1fr 1fr;}
+  .ai{grid-template-columns:1fr;gap:.7rem;}
+  .pps{grid-template-columns:1fr;}
+  .pgr{grid-template-columns:1fr;}
+  nav .nav-links{display:none;}
+  body,a,.btn{cursor:auto;}
+  .cur,.cur-r{display:none;}
+}
+@media(max-width:580px){.egrid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="cur" id="c"></div><div class="cur-r" id="cr"></div>
+
+<nav>
+  <div class="nav-logo">Đặng Công Thành</div>
+  <ul class="nav-links">
+    <li><a href="#work">Work</a></li>
+    <li><a href="#ac">Academic</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#vision">Vision</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="tacho"></div>
+  <div class="speed-lines"><div class="sl"></div><div class="sl"></div><div class="sl"></div><div class="sl"></div><div class="sl"></div></div>
+  <div class="hud-data">
+    <div>SECTOR_1 <span>02:14.8</span></div>
+    <div>SECTOR_2 <span>01:58.3</span></div>
+    <div>SECTOR_3 <span>00:47.2</span></div>
+    <div style="border-top:1px solid var(--border);padding-top:.4rem;margin-top:.4rem;">LAP TOTAL <span>04:59.3</span></div>
+    <div>STATUS <span>ACTIVE ▶</span></div>
+  </div>
+  <div class="hc wrap">
+    <p class="hey">◼ Game Designer // Systems &amp; Gameplay // Hà Nội, Việt Nam</p>
+    <h1 class="hn">Đặng<br><span>Công Thành</span></h1>
+    <p class="htag">Design is not creativity in isolation. It is a discipline of analysis, iteration, and honest reckoning with failure. Every prototype is a lap. Every playtest is telemetry.</p>
+    <div class="hmeta">
+      <div><div class="hstat-n">4+</div><div class="hstat-l">Years Designing</div></div>
+      <div><div class="hstat-n">2</div><div class="hstat-l">Shipped Titles</div></div>
+      <div><div class="hstat-n">3</div><div class="hstat-l">Studios</div></div>
+      <div><div class="hstat-n">7.0</div><div class="hstat-l">IELTS</div></div>
+    </div>
+    <div class="hcta">
+      <a href="#work" class="btn btn-a">View Work →</a>
+      <a href="mailto:thanhdang210203@gmail.com" class="btn btn-b">Get in Touch</a>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="tick-item">Systems Design <span>●</span></span>
+    <span class="tick-item">Level Architecture <span>●</span></span>
+    <span class="tick-item">VigaFun Studio <span>●</span></span>
+    <span class="tick-item">Color Knitzy — Published <span>●</span></span>
+    <span class="tick-item">Pixel Dom — Published <span>●</span></span>
+    <span class="tick-item">Narrative Integration <span>●</span></span>
+    <span class="tick-item">IELTS 7.0 <span>●</span></span>
+    <span class="tick-item">BSc Hons CGDP <span>●</span></span>
+    <span class="tick-item">GDD Authoring <span>●</span></span>
+    <span class="tick-item">Playtesting &amp; Iteration <span>●</span></span>
+    <!-- duplicate for seamless loop -->
+    <span class="tick-item">Systems Design <span>●</span></span>
+    <span class="tick-item">Level Architecture <span>●</span></span>
+    <span class="tick-item">VigaFun Studio <span>●</span></span>
+    <span class="tick-item">Color Knitzy — Published <span>●</span></span>
+    <span class="tick-item">Pixel Dom — Published <span>●</span></span>
+    <span class="tick-item">Narrative Integration <span>●</span></span>
+    <span class="tick-item">IELTS 7.0 <span>●</span></span>
+    <span class="tick-item">BSc Hons CGDP <span>●</span></span>
+    <span class="tick-item">GDD Authoring <span>●</span></span>
+    <span class="tick-item">Playtesting &amp; Iteration <span>●</span></span>
+  </div>
+</div>
+
+<!-- PHILOSOPHY -->
+<section id="philosophy">
+  <div class="wrap">
+    <div class="ph-grid">
+      <div class="ph-q rv">
+        <p class="q-vi">Thất bại là mẹ thành công</p>
+        <p class="q-en">A Vietnamese saying that shaped my approach to design. Not a consolation phrase — a working method. Every lap that goes wrong teaches something a clean lap cannot.</p>
+      </div>
+      <div class="ph-body rv">
+        <h3>Every failed playtest is telemetry. Act on it.</h3>
+        <p>My name, <strong>Công Thành</strong>, is an inversion of the Vietnamese word for success — <strong>Thành Công</strong>. That contrast reflects my working philosophy. The most valuable information in a design process is not what worked on the first attempt — it is what exposed a gap in your thinking when it did not.</p>
+        <p>At VigaFun I learned that strong design decisions are almost never about adding features. The most impactful change I made on a shipped title was a timing adjustment — not a new mechanic. Retention improved. The data made the argument. I just read it correctly.</p>
+        <div class="pps">
+          <div class="pp"><div class="pp-n">01</div><div class="pp-t">Data Over Intuition</div><div class="pp-d">Gut instinct starts the prototype. Live data determines if it ships.</div></div>
+          <div class="pp"><div class="pp-n">02</div><div class="pp-t">Reduce, Don't Add</div><div class="pp-d">Complexity is the last resort. Good design removes friction first.</div></div>
+          <div class="pp"><div class="pp-n">03</div><div class="pp-t">Own the Lap</div><div class="pp-d">When a project fails, the question starts with the designer.</div></div>
+          <div class="pp"><div class="pp-n">04</div><div class="pp-t">Know the Circuit</div><div class="pp-d">Design decisions can't be separated from production constraints. Know both.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="finish"></div>
+
+<!-- WORK -->
+<section id="work">
+  <div class="wrap">
+    <div class="wi">
+      <div><div class="lbl">Professional Work</div><h2 class="st">SHIPPED &amp;<br>PRODUCTION</h2></div>
+      <p class="rv">Every project here was built inside a real studio with real constraints. What matters is not the finished screen — it is the specific design decision made, why it was made, and what the outcome was. That accountability is the measure of professional practice.</p>
+    </div>
+    <div class="pgrid">
+      <!-- FEATURED -->
+      <div class="pc feat rv">
+        <div class="pm">
+          <p class="ptag"><span class="ptag-dot"></span>VigaFun · July 2025 – Present</p>
+          <h3 class="ptitle">Color Knitzy</h3>
+          <p class="pstudio">Published Mobile Game · iOS &amp; Android · VigaFun Studio</p>
+          <p class="pdesc">Full-pipeline responsibility for level architecture, mechanic specification, and feature iteration across a live mobile title. Every level was designed against a specific player-skill hypothesis, tested against live behavioural data, and revised based on what the analytics revealed — not what seemed reasonable in the documentation.</p>
+          <div class="dd">
+            <p class="dd-l">↳ Key Design Decision &amp; Outcome</p>
+            <p class="dd-t">Playtest data revealed drop-off concentrated around advertisement pacing interrupting flow states — not mechanic difficulty. Proposed restructuring the timing of ad events within the session arc rather than redesigning mechanics. Retention improved in subsequent live updates. Friction is almost always systemic, not mechanical.</p>
+          </div>
+          <div class="ptags"><span class="rt">Level Design</span><span class="rt">Systems Design</span><span class="rt">Mechanic Spec</span><span class="rt">Retention Analysis</span><span class="rt">GDD Authoring</span><span class="rt">Difficulty Curves</span></div>
+        </div>
+        <div class="ps2">
+          <div class="pss"><div class="pss-l">Platform</div><div class="pss-v">iOS + Android</div></div>
+          <div class="pss"><div class="pss-l">Status</div><div class="pss-v" style="font-size:1.1rem;color:var(--text)">Published · Live</div></div>
+          <div class="pss"><div class="pss-l">Focus</div><div class="pss-v" style="font-size:.9rem;color:var(--text)">Retention &amp; Pacing</div></div>
+          <div class="pss"><div class="pss-l">Role</div><div class="pss-v" style="font-size:.9rem;color:var(--text)">Game Designer</div></div>
+        </div>
+      </div>
+      <div class="pc rv">
+        <p class="ptag"><span class="ptag-dot"></span>VigaFun · 2025</p>
+        <h3 class="ptitle">Pixel Dom</h3>
+        <p class="pstudio">Published Mobile Game · VigaFun Studio</p>
+        <p class="pdesc">Owned level progression architecture and mechanic documentation for a published pixel-art mobile title. Produced GDDs that served as the single authoritative production reference for design, engineering, and QA — eliminating interpretation gaps between disciplines during implementation.</p>
+        <div class="dd"><p class="dd-l">↳ Design Responsibility</p><p class="dd-t">Calibrated challenge windows across multiple tiers to sustain engagement without triggering frustration drop-off. Maintained design coherence through structured GDD revision cycles shared across the full production team.</p></div>
+        <div class="ptags"><span class="rt">Level Design</span><span class="rt">Feature Design</span><span class="rt">Progression Systems</span><span class="rt">GDD</span></div>
+      </div>
+      <div class="pc rv">
+        <p class="ptag"><span class="ptag-dot"></span>LacBird.co · Dec 2023 – Apr 2024</p>
+        <h3 class="ptitle">Paper Flower</h3>
+        <p class="pstudio">Narrative Game · LacBird.co</p>
+        <p class="pdesc">First professional project — and the one that clarified the gap between capability and preparation. Served as narrative designer and unexpected project lead for a four-person team. Scope failed. Communication broke down. The project stalled under my leadership. Taking full ownership of that — rather than distributing the blame — changed every decision I have made since.</p>
+        <div class="dd"><p class="dd-l">↳ Turning Point</p><p class="dd-t">Every documentation habit and production discipline I now have traces back to what I learned from this project not working. Failure is only wasted if you refuse to look at it directly.</p></div>
+        <div class="ptags"><span class="rt">Narrative Design</span><span class="rt">Project Lead</span><span class="rt">Story Integration</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="finish"></div>
+
+<!-- EXPERTISE -->
+<section id="exp">
+  <div class="wrap">
+    <div class="lbl">Disciplines</div>
+    <h2 class="st">DESIGN<br>EXPERTISE</h2>
+    <div class="egrid">
+      <div class="ei rv" data-n="01"><span class="ei-ic">⬡</span><h3 class="ei-t">Systems &amp; Gameplay</h3><p class="ei-d">Connecting mechanics, psychology, and experience goals. Difficulty architecture, feature interdependency, player learning trajectory design.</p></div>
+      <div class="ei rv" data-n="02"><span class="ei-ic">◈</span><h3 class="ei-t">Level Design</h3><p class="ei-d">Spaces that communicate without exposition. Mobile and narrative contexts. Spatial composition, cognitive pacing, challenge calibration.</p></div>
+      <div class="ei rv" data-n="03"><span class="ei-ic">◎</span><h3 class="ei-t">Narrative Integration</h3><p class="ei-d">Story that serves mechanics. Player agency, responsive narrative, emotional context for mechanical choices without breaking the play loop.</p></div>
+      <div class="ei rv" data-n="04"><span class="ei-ic">▤</span><h3 class="ei-t">Design Documentation</h3><p class="ei-d">GDDs as living production references — specs, feature briefs, iteration logs that engineers and artists act on without reinterpretation.</p></div>
+      <div class="ei rv" data-n="05"><span class="ei-ic">◐</span><h3 class="ei-t">Playtesting &amp; Iteration</h3><p class="ei-d">Hypothesis-driven iteration from structured observation and live data. Not adjusting from intuition — testing a specific claim and recording the result.</p></div>
+      <div class="ei rv" data-n="06"><span class="ei-ic">△</span><h3 class="ei-t">Creative Direction</h3><p class="ei-d">Film direction and cinematography. Cross-medium experience that trains attention control and experience pacing — directly applicable to game design.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ACADEMIC -->
+<section id="ac">
+  <div class="wrap">
+    <div class="lbl">Academic &amp; Extracurricular</div>
+    <h2 class="st">BUILT UNDER<br>CONSTRAINT</h2>
+    <div class="alist">
+      <div class="ai rv"><div class="ay">23</div><div><p class="arole">Game Designer · BUV Game Jam 2023</p><h4 class="at">BUV Game Jam 2023 — Sole Designer</h4><p class="ad">Every mechanic decision, scope boundary, and quality call was mine alone under a fixed-time constraint. Produced a complete playable prototype through rapid prototyping discipline and ruthless scope management. The ability to make confident design decisions in isolation — without a creative director above you — is a specific skill that game jam environments test directly.</p><div class="achips"><span class="ach">Rapid Prototyping</span><span class="ach">Scope Management</span><span class="ach">Solo Decisions</span><span class="ach">QC Under Pressure</span></div></div><span class="abadge">Game Jam</span></div>
+      <div class="ai rv"><div class="ay">22</div><div><p class="arole">Designer &amp; Programmer · BUV Game Jam 2022</p><h4 class="at">BUV Game Jam 2022 — Dual Role</h4><p class="ad">Carried both design and programming simultaneously. Learned that design decisions have implementation costs, and that understanding those costs before committing is not optional at any production scale. The friction between what you want to build and what you can actually build in available time is one of the most valuable constraints a designer can work inside.</p><div class="achips"><span class="ach">Cross-Discipline</span><span class="ach">Rapid Iteration</span><span class="ach">GDD Writing</span><span class="ach">Time-Constrained</span></div></div><span class="abadge">Game Jam</span></div>
+      <div class="ai rv"><div class="ay">24</div><div><p class="arole">Director &amp; Producer · Final Year</p><h4 class="at">"A Journey to Peace" — Short Film</h4><p class="ad">End-to-end creative direction: script, cinematography, shot composition, actor direction, editorial pacing. Film and game design share more structural logic than most designers acknowledge — both are fundamentally about controlling attention and managing emotional pacing across a designed timeline.</p><div class="achips"><span class="ach">Creative Direction</span><span class="ach">Screenwriting</span><span class="ach">Pacing</span><span class="ach">Production Leadership</span></div></div><span class="abadge">Film</span></div>
+      <div class="ai rv"><div class="ay">23</div><div><p class="arole">Event Organiser · BUV Photography Club</p><h4 class="at">Catch Your Glimpse — Photography Event</h4><p class="ad">Full coordination of a campus photography event. Developed the ability to translate creative vision into sequential production steps — project management as a design skill.</p><div class="achips"><span class="ach">Coordination</span><span class="ach">Cross-Team Communication</span><span class="ach">Creative Direction</span></div></div><span class="abadge">Event</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="finish"></div>
+
+<!-- PROCESS -->
+<section id="process">
+  <div class="wrap">
+    <div class="lbl">Design Process</div>
+    <h2 class="st">HOW I THINK</h2>
+    <p style="margin-top:.8rem;color:var(--text-2);font-size:.85rem;line-height:1.8;max-width:580px;">Reserved for process documentation — the work that shows how designs were developed, not just what they became.</p>
+    <div class="pgr">
+      <div class="ph rv"><span class="ph-ic">📄</span><p class="ph-t">Game Design Documents</p><p class="ph-d">GDDs from Color Knitzy, Pixel Dom, or Paper Flower. A 4–6 page mechanic specification with annotated diagrams shows what you designed, the variables involved, and edge cases considered.</p><span class="ph-tip">↳ Critical for postgraduate portfolio evidence</span></div>
+      <div class="ph rv"><span class="ph-ic">🎬</span><p class="ph-t">Gameplay Videos</p><p class="ph-d">Footage of shipped titles, prototype demos, or gameplay walkthroughs. Seeing your design decisions in motion converts described competency into demonstrated competency.</p><span class="ph-tip">↳ Embed YouTube / Vimeo</span></div>
+      <div class="ph rv"><span class="ph-ic">🔁</span><p class="ph-t">Iteration Logs</p><p class="ph-d">A single mechanic across three iterations: original design, what the playtest revealed, what you changed, and why. This one exercise shows design thinking more clearly than any polished showcase.</p><span class="ph-tip">↳ Shows structured design thinking</span></div>
+      <div class="ph rv"><span class="ph-ic">📐</span><p class="ph-t">System Diagrams</p><p class="ph-d">Mechanic dependency maps, difficulty curves, player decision flowcharts. Shows the ability to model design logic structurally — communicates systems literacy at a glance.</p><span class="ph-tip">↳ Demonstrates systems vocabulary</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- VISION -->
+<section id="vision">
+  <div class="wrap rv">
+    <div class="lbl">Direction</div>
+    <div class="vg">
+      <div class="vs">Aim for<br>the apex.<br><em>Design at the<br>highest level.</em></div>
+      <div class="vd">
+        <p>The market I work in is shaped by mobile constraints — short sessions, aggressive monetisation, extremely low friction tolerance. Working within those constraints has made me a more disciplined designer. But discipline applied to a constrained context eventually hits a ceiling.</p>
+        <p>The next stage requires operating where design is tested against the full weight of <strong>craft, research, and production rigour</strong> — not just retention dashboards. That shift, from surviving constraints to setting standards, is what drives the direction I am heading.</p>
+        <p>The goal is a <strong>higher level of practice</strong> — one where I can contribute to shaping what serious game design looks like in a market that is only beginning to ask that question.</p>
+        <a href="#contact" class="btn btn-a" style="margin-top:1.2rem;display:inline-flex;">Let's Talk →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="wrap">
+    <div class="lbl">Contact</div>
+    <h2 class="chead">GET IN<br>TOUCH</h2>
+    <p class="csub">Open to collaborations, postgraduate enquiries, and conversations about game design, systems, and the Vietnamese games industry.</p>
+    <div class="clinks">
+      <a href="mailto:thanhdang210203@gmail.com" class="cl"><span>✉</span>thanhdang210203@gmail.com</a>
+      <a href="https://linkedin.com/in/dangcongthanh" target="_blank" class="cl"><span>↗</span>LinkedIn</a>
+      <a href="https://linktr.ee/thanhdang2102" target="_blank" class="cl"><span>↗</span>Linktree</a>
+      <a href="https://500px.com/p/thanhhdang" target="_blank" class="cl"><span>↗</span>Photography</a>
+    </div>
+  </div>
+</section>
+<footer>
+  <p>© 2025 Đặng Công Thành — Game Designer</p>
+  <p>Hà Nội, Việt Nam &nbsp;·&nbsp; IELTS 7.0 &nbsp;·&nbsp; BSc (Hons) Computer Games Design &amp; Programming</p>
+</footer>
+
+<script>
+const c=document.getElementById('c'),cr=document.getElementById('cr');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;c.style.left=mx+'px';c.style.top=my+'px';});
+(function loop(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;cr.style.left=rx+'px';cr.style.top=ry+'px';requestAnimationFrame(loop);})();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cr.style.width='50px';cr.style.height='50px';cr.style.opacity='.5';});
+  el.addEventListener('mouseleave',()=>{cr.style.width='40px';cr.style.height='40px';cr.style.opacity='.25';});
+});
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const sibs=[...e.target.parentElement.children].filter(c=>c.classList.contains('rv'));
+      const i=sibs.indexOf(e.target);
+      setTimeout(()=>e.target.classList.add('in'),i*70);
+      obs.unobserve(e.target);
+    }
+  });
+},{threshold:.08,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

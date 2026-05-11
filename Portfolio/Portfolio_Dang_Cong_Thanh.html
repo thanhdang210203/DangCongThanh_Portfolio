@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đặng Công Thành — Game Designer</title>
+
+<!--
+  ══════════════════════════════════════════════════════════════
+  PORTFOLIO — ĐẶNG CÔNG THÀNH
+  Game Designer | Systems & Gameplay | Vietnam
+
+  DESIGN RATIONALE (for Abertay application):
+  ─────────────────────────────────────────────
+  Aesthetic: "Track Notes" — inspired by the motorcycle racing
+  metaphor in the personal statement. Clean, technical, disciplined.
+  Dark mechanical base (#0D0D0D) with a single warm accent (#E8A020)
+  that reads like a lap-time display. Typography is editorial:
+  "Bebas Neue" for impact headings + "DM Sans" for readability.
+
+  This visual language mirrors the core thesis of your personal
+  statement: game design as a technical sport — not decoration.
+
+  HOW EACH SECTION SUPPORTS YOUR APPLICATION:
+  ─────────────────────────────────────────────
+  1. HERO — Immediate clarity on who you are and what you do.
+     Abertay wants to see a designer with a point of view.
+     The racing metaphor makes you memorable from second one.
+
+  2. ABOUT / PHILOSOPHY — Mirrors your PS philosophy paragraph.
+     Shows self-awareness and reflective practice (key Abertay value).
+
+  3. PROFESSIONAL WORK — VigaFun projects with shipped titles.
+     This is your strongest proof point. Named games + measurable
+     impact (retention) transforms "claimed experience" into evidence.
+
+  4. ACADEMIC WORK — BUV Game Jams and Paper Flower show you can
+     iterate fast and work in constrained environments.
+
+  5. PROCESS SECTION — Placeholder for GDDs/videos (per your request).
+     Abertay DES510 is specifically about design process documentation.
+     This section MUST be filled — it is the deciding factor for 2:2 applicants.
+
+  6. CONTACT — Clean, professional, direct.
+  ══════════════════════════════════════════════════════════════
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════════
+   CSS CUSTOM PROPERTIES — DESIGN TOKENS
+   Change accent color here to retheme the whole site
+   ═══════════════════════════════════════════════════ */
+:root {
+  --bg:        #0A0A0A;
+  --surface:   #111111;
+  --surface2:  #181818;
+  --border:    #222222;
+  --accent:    #E8A020;   /* warm amber — lap-timer yellow */
+  --accent-dim:#8A5F10;
+  --text:      #E8E4DC;
+  --text-2:    #888880;
+  --text-3:    #444440;
+  --white:     #FFFFFF;
+
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+
+  --max-w: 1200px;
+  --radius: 4px;
+  --gap: clamp(1.5rem, 4vw, 3rem);
+}
+
+/* ═══════════════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  cursor: none; /* custom cursor */
+}
+
+/* Custom cursor — subtle motorsport detail */
+.cursor {
+  position: fixed;
+  width: 10px; height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease, opacity 0.2s;
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.25s ease, width 0.2s, height 0.2s, opacity 0.2s;
+  opacity: 0.4;
+}
+
+a { color: inherit; text-decoration: none; cursor: none; }
+img { max-width: 100%; display: block; }
+
+/* ═══════════════════════════════════════════════════
+   NOISE TEXTURE OVERLAY — adds cinematic grain
+   ═══════════════════════════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 10000;
+  opacity: 0.35;
+}
+
+/* ═══════════════════════════════════════════════════
+   NAVIGATION
+   ═══════════════════════════════════════════════════ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 1.25rem var(--gap);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s, background 0.3s;
+}
+nav.scrolled {
+  background: rgba(10,10,10,0.95);
+  border-bottom-color: var(--border);
+  backdrop-filter: blur(12px);
+}
+.nav-logo {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.nav-links {
+  display: flex; gap: 2rem; list-style: none;
+}
+.nav-links a {
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--accent); }
+
+/* ═══════════════════════════════════════════════════
+   SECTION UTILITIES
+   ═══════════════════════════════════════════════════ */
+section { padding: clamp(4rem, 10vw, 8rem) var(--gap); }
+.container { max-width: var(--max-w); margin: 0 auto; }
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.section-label::after {
+  content: '';
+  display: block;
+  height: 1px;
+  width: 40px;
+  background: var(--accent);
+  opacity: 0.5;
+}
+
+h2.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 0.95;
+  color: var(--white);
+  margin-bottom: 0.5rem;
+}
+
+/* Fade-in on scroll */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ═══════════════════════════════════════════════════
+   HERO
+   WHY THIS WORKS FOR ABERTAY:
+   Immediate statement of identity. The racing metaphor
+   connects directly to your personal statement. An
+   admissions reader who checks your portfolio after
+   reading your PS will feel coherence — that you are
+   the same person on every page.
+   ═══════════════════════════════════════════════════ */
+#hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: clamp(3rem, 8vw, 6rem);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated track lines background */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  right: -5%;
+  width: 70%;
+  height: 130%;
+  background: radial-gradient(ellipse at 60% 40%,
+    rgba(232,160,32,0.06) 0%,
+    transparent 65%);
+  animation: pulse-glow 6s ease-in-out infinite alternate;
+}
+@keyframes pulse-glow {
+  from { opacity: 0.6; transform: scale(1); }
+  to   { opacity: 1;   transform: scale(1.08); }
+}
+
+/* Diagonal grid lines */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(232,160,32,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232,160,32,0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.7) 100%);
+}
+
+/* Large decorative text */
+.hero-deco {
+  position: absolute;
+  top: 8%;
+  right: -2%;
+  font-family: var(--font-display);
+  font-size: clamp(12rem, 22vw, 22rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(232,160,32,0.08);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  width: 100%;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fade-up 0.8s 0.2s forwards;
+}
+
+.hero-name {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 12vw, 11rem);
+  line-height: 0.88;
+  color: var(--white);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fade-up 0.9s 0.4s forwards;
+}
+.hero-name span {
+  color: var(--accent);
+  display: block;
+}
+
+.hero-tagline {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 300;
+  color: var(--text-2);
+  max-width: 520px;
+  line-height: 1.55;
+  opacity: 0;
+  animation: fade-up 0.9s 0.6s forwards;
+  border-left: 2px solid var(--accent);
+  padding-left: 1.25rem;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 2.5rem;
+  margin-top: 2.5rem;
+  opacity: 0;
+  animation: fade-up 0.9s 0.8s forwards;
+}
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.hero-stat-num {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--accent);
+  line-height: 1;
+}
+.hero-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.hero-cta {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  opacity: 0;
+  animation: fade-up 0.9s 1s forwards;
+}
+.btn-primary {
+  padding: 0.75rem 1.75rem;
+  background: var(--accent);
+  color: #000;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+  border: none;
+  cursor: none;
+  transition: background 0.2s, transform 0.15s;
+  display: inline-block;
+}
+.btn-primary:hover { background: #FFC040; transform: translateY(-2px); }
+
+.btn-ghost {
+  padding: 0.75rem 1.75rem;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  cursor: none;
+  transition: border-color 0.2s, color 0.2s, transform 0.15s;
+  display: inline-block;
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  right: var(--gap);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  animation: fade-up 1s 1.4s forwards;
+}
+.scroll-line {
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(to bottom, var(--accent), transparent);
+  animation: scroll-pulse 2s ease-in-out infinite;
+}
+@keyframes scroll-pulse {
+  0%, 100% { transform: scaleY(1); opacity: 1; }
+  50%       { transform: scaleY(0.5); opacity: 0.4; }
+}
+.scroll-text {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  writing-mode: vertical-rl;
+}
+
+/* ═══════════════════════════════════════════════════
+   PHILOSOPHY
+   WHY THIS WORKS FOR ABERTAY:
+   Abertay's MProf is explicitly built on reflective
+   practice. This section shows you already think this
+   way — before the programme even starts. The quote
+   format makes your Vietnamese cultural context visible
+   without being performative.
+   ═══════════════════════════════════════════════════ */
+#philosophy {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.philosophy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: center;
+}
+
+.philosophy-quote {
+  position: relative;
+  padding: 2.5rem;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+}
+.philosophy-quote::before {
+  content: '"';
+  position: absolute;
+  top: -0.5rem;
+  left: 1.5rem;
+  font-family: var(--font-display);
+  font-size: 5rem;
+  color: var(--accent);
+  line-height: 1;
+}
+.quote-viet {
+  font-size: 1.3rem;
+  font-weight: 300;
+  color: var(--accent);
+  font-style: italic;
+  margin-bottom: 0.75rem;
+  margin-top: 1rem;
+}
+.quote-en {
+  font-size: 0.9rem;
+  color: var(--text-2);
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.philosophy-text h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  color: var(--white);
+  line-height: 1.1;
+  margin-bottom: 1.25rem;
+}
+.philosophy-text p {
+  color: var(--text-2);
+  font-size: 0.95rem;
+  line-height: 1.75;
+  margin-bottom: 1rem;
+}
+.philosophy-text p strong { color: var(--text); }
+
+/* Design principles */
+.principles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+.principle {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  background: var(--surface2);
+}
+.principle-num {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.4rem;
+}
+.principle-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 0.25rem;
+}
+.principle-desc {
+  font-size: 0.75rem;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════════════
+   PROFESSIONAL WORK
+   WHY THIS WORKS FOR ABERTAY:
+   Shipped titles with named games and specific design
+   decisions (ad pacing → retention) is EXACTLY the
+   kind of evidence-based, consequence-aware design
+   thinking Abertay's admissions values. Don't just
+   list what you did — show what changed because of it.
+   ═══════════════════════════════════════════════════ */
+#work { background: var(--bg); }
+
+.work-intro {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: var(--gap);
+  margin-bottom: clamp(3rem, 6vw, 5rem);
+  align-items: end;
+}
+.work-intro p {
+  color: var(--text-2);
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5px;
+  background: var(--border);
+  border: 1.5px solid var(--border);
+}
+
+.project-card {
+  background: var(--surface);
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+}
+.project-card:hover { background: var(--surface2); }
+.project-card.featured {
+  grid-column: 1 / -1;
+  min-height: 280px;
+  flex-direction: row;
+  gap: 3rem;
+  align-items: flex-start;
+}
+
+/* Accent stripe */
+.project-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: transparent;
+  transition: background 0.3s;
+}
+.project-card:hover::before { background: var(--accent); }
+
+.project-tag {
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.tag-dot {
+  width: 5px; height: 5px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.project-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  color: var(--white);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+.project-studio {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  margin-bottom: 1.25rem;
+}
+
+.project-desc {
+  font-size: 0.9rem;
+  color: var(--text-2);
+  line-height: 1.7;
+  flex: 1;
+  margin-bottom: 1.5rem;
+}
+
+/* Design decision highlight — the most important element */
+.design-decision {
+  padding: 1rem 1.25rem;
+  background: rgba(232,160,32,0.07);
+  border-left: 2px solid var(--accent);
+  margin-top: auto;
+}
+.decision-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+  opacity: 0.8;
+}
+.decision-text {
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.project-role-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+.role-tag {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+}
+
+.project-main { flex: 1; }
+.project-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sidebar-stat {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+.sidebar-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 0.3rem;
+}
+.sidebar-stat-value {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--accent);
+  line-height: 1;
+}
+.sidebar-stat-sub {
+  font-size: 0.7rem;
+  color: var(--text-2);
+  margin-top: 0.2rem;
+}
+
+/* ═══════════════════════════════════════════════════
+   SKILLS / EXPERTISE
+   WHY THIS WORKS FOR ABERTAY:
+   Shows you understand the full design pipeline, not
+   just surface-level creativity. Systems design and
+   playtesting are specifically valued in a programme
+   that centres on production-aware iteration.
+   ═══════════════════════════════════════════════════ */
+#expertise {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.expertise-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  margin-top: 3rem;
+}
+
+.expertise-item {
+  background: var(--surface2);
+  padding: 2rem 1.75rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.25s;
+}
+.expertise-item:hover { background: #1C1C1C; }
+.expertise-item::after {
+  content: attr(data-num);
+  position: absolute;
+  bottom: -1rem;
+  right: -0.5rem;
+  font-family: var(--font-display);
+  font-size: 6rem;
+  color: rgba(232,160,32,0.04);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.exp-icon {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+.exp-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--white);
+  margin-bottom: 0.6rem;
+  line-height: 1.1;
+}
+.exp-desc {
+  font-size: 0.82rem;
+  color: var(--text-2);
+  line-height: 1.65;
+}
+
+/* ═══════════════════════════════════════════════════
+   ACADEMIC PROJECTS
+   WHY THIS WORKS FOR ABERTAY:
+   Shows you have been iterating across different
+   contexts and team sizes. Game Jams especially signal
+   the ability to design under constraints — directly
+   relevant to studio-based MProf work.
+   ═══════════════════════════════════════════════════ */
+#academic { background: var(--bg); }
+
+.academic-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 3rem;
+}
+
+.academic-item {
+  background: var(--surface);
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 2rem;
+  padding: 1.75rem 2rem;
+  align-items: start;
+  transition: background 0.2s;
+}
+.academic-item:hover { background: var(--surface2); }
+
+.acad-year {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--accent);
+  line-height: 1;
+  opacity: 0.7;
+}
+.acad-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--white);
+  margin-bottom: 0.4rem;
+}
+.acad-role {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+}
+.acad-desc {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  line-height: 1.65;
+  max-width: 560px;
+}
+.acad-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+.skill-chip {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--border);
+  color: var(--text-3);
+}
+.acad-badge {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  white-space: nowrap;
+  align-self: flex-start;
+}
+
+/* ═══════════════════════════════════════════════════
+   PROCESS SECTION — PLACEHOLDER
+   WHY THIS WORKS FOR ABERTAY:
+   This is the MOST IMPORTANT section for a 2:2
+   applicant. Abertay specifically evaluates your
+   Portfolio of Evidence on design process —
+   not finished products. Fill this with:
+   - Game Design Documents (even 3-5 pages)
+   - Playtest notes and iteration logs
+   - System diagrams and mechanic breakdowns
+   - Video walkthroughs of your prototypes
+   ═══════════════════════════════════════════════════ */
+#process {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.process-note {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+  margin-top: 3rem;
+}
+
+.process-placeholder {
+  border: 1px dashed var(--border);
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1rem;
+  min-height: 280px;
+  position: relative;
+  transition: border-color 0.3s;
+}
+.process-placeholder:hover { border-color: var(--accent-dim); }
+
+.placeholder-icon {
+  font-size: 2.5rem;
+  opacity: 0.3;
+}
+.placeholder-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--text-2);
+}
+.placeholder-desc {
+  font-size: 0.82rem;
+  color: var(--text-3);
+  line-height: 1.65;
+  max-width: 280px;
+}
+.placeholder-tip {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--accent-dim);
+  opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════════════
+   GOAL / VISION
+   WHY THIS WORKS FOR ABERTAY:
+   Shows you have a clear post-programme direction.
+   Abertay invests in students who will carry that
+   investment somewhere meaningful. "Return to Vietnam
+   and raise the standard" is a compelling narrative.
+   ═══════════════════════════════════════════════════ */
+#vision {
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+#vision::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at 80% 50%,
+    rgba(232,160,32,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.vision-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: center;
+}
+
+.vision-statement {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  color: var(--white);
+  line-height: 1.05;
+}
+.vision-statement em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.vision-details p {
+  color: var(--text-2);
+  font-size: 0.93rem;
+  line-height: 1.75;
+  margin-bottom: 1rem;
+}
+.vision-details p strong { color: var(--text); }
+
+/* ═══════════════════════════════════════════════════
+   CONTACT
+   ═══════════════════════════════════════════════════ */
+#contact {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.contact-heading {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 6rem);
+  color: var(--white);
+  line-height: 0.9;
+  margin-bottom: 1.5rem;
+}
+.contact-sub {
+  color: var(--text-2);
+  font-size: 1rem;
+  max-width: 480px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.7;
+}
+.contact-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+.contact-link {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  padding: 0.6rem 1.2rem;
+  transition: border-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.contact-link:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Footer */
+footer {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  padding: 1.5rem var(--gap);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+footer p {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-3);
+  letter-spacing: 0.08em;
+}
+
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .philosophy-grid,
+  .process-note,
+  .vision-content,
+  .work-intro { grid-template-columns: 1fr; }
+
+  .projects-grid { grid-template-columns: 1fr; }
+  .project-card.featured { flex-direction: column; }
+  .project-sidebar { width: 100%; }
+
+  .expertise-grid { grid-template-columns: 1fr 1fr; }
+
+  .academic-item { grid-template-columns: 1fr; }
+  .acad-year { font-size: 1.4rem; }
+  .acad-badge { align-self: flex-start; }
+
+  .hero-meta { flex-wrap: wrap; gap: 1.5rem; }
+  .nav-links { display: none; }
+  body { cursor: auto; }
+  .cursor, .cursor-ring { display: none; }
+  a { cursor: pointer; }
+  .btn-primary, .btn-ghost { cursor: pointer; }
+}
+@media (max-width: 600px) {
+  .expertise-grid { grid-template-columns: 1fr; }
+  .principles { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     NAVIGATION
+     ═══════════════════════════════════════════════════ -->
+<nav id="nav">
+  <div class="nav-logo">DCT — Portfolio</div>
+  <ul class="nav-links">
+    <li><a href="#work">Work</a></li>
+    <li><a href="#academic">Academic</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#vision">Vision</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg">
+    <div class="hero-grid"></div>
+  </div>
+  <div class="hero-deco">DESIGN</div>
+
+  <div class="hero-content container">
+    <p class="hero-eyebrow">▶ Game Designer — Systems &amp; Gameplay — Hanoi, Vietnam</p>
+
+    <h1 class="hero-name">
+      Đặng<br>
+      <span>Công Thành</span>
+    </h1>
+
+    <p class="hero-tagline">
+      Game design is a technical sport. Progress is measured through
+      analysis, iteration, and an honest confrontation with failure —
+      not decoration.
+    </p>
+
+    <div class="hero-meta">
+      <div class="hero-stat">
+        <span class="hero-stat-num">4+</span>
+        <span class="hero-stat-label">Years designing</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">2</span>
+        <span class="hero-stat-label">Shipped titles</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">3</span>
+        <span class="hero-stat-label">Studios worked</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">7.0</span>
+        <span class="hero-stat-label">IELTS score</span>
+      </div>
+    </div>
+
+    <div class="hero-cta">
+      <a href="#work" class="btn-primary">View Work</a>
+      <a href="mailto:thanhdang210203@gmail.com" class="btn-ghost">Get in Touch</a>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    <div class="scroll-line"></div>
+    <span class="scroll-text">Scroll</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     PHILOSOPHY
+     ═══════════════════════════════════════════════════ -->
+<section id="philosophy">
+  <div class="container">
+    <div class="philosophy-grid">
+
+      <div class="philosophy-quote reveal">
+        <p class="quote-viet">Thất bại là mẹ thành công</p>
+        <p class="quote-en">"Failure is the foundation of success" — a Vietnamese saying
+          I no longer treat as a phrase. It is how I approach every
+          prototype, every playtest, every design decision that does not land.</p>
+      </div>
+
+      <div class="philosophy-text reveal">
+        <h3>I design by looking at what broke, not what worked.</h3>
+        <p>My name, <strong>Công Thành</strong>, is a deliberate contrast to <strong>Thành Công</strong> — success.
+          That inversion is how I think about game design. Progress is built
+          through effort, missteps, and reflection, not through getting it
+          right the first time.</p>
+        <p>This is not a romantic idea. It is a production discipline.
+          Every design decision carries responsibility beyond intention.
+          Misjudging pacing — in gameplay or monetisation — has consequences
+          that only become visible when you look at data and player behaviour honestly.</p>
+
+        <div class="principles">
+          <div class="principle">
+            <div class="principle-num">01</div>
+            <div class="principle-title">Evidence First</div>
+            <div class="principle-desc">Playtest data over intuition. Always ground iteration in what players actually do.</div>
+          </div>
+          <div class="principle">
+            <div class="principle-num">02</div>
+            <div class="principle-title">Remove Friction</div>
+            <div class="principle-desc">Strong design is rarely about adding complexity. It is about eliminating it.</div>
+          </div>
+          <div class="principle">
+            <div class="principle-num">03</div>
+            <div class="principle-title">Own the Failure</div>
+            <div class="principle-desc">When a project fails, the question is never the team — it is the process.</div>
+          </div>
+          <div class="principle">
+            <div class="principle-num">04</div>
+            <div class="principle-title">Full-Cycle Thinking</div>
+            <div class="principle-desc">Design decisions are inseparable from production realities. Know both.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     PROFESSIONAL WORK
+     ═══════════════════════════════════════════════════ -->
+<section id="work">
+  <div class="container">
+    <div class="work-intro">
+      <div>
+        <p class="section-label">Professional Work</p>
+        <h2 class="section-title">SHIPPED &amp;<br>PRODUCTION</h2>
+      </div>
+      <p class="reveal">
+        The following projects were created in a professional studio context
+        with real production constraints, live player data, and shipped to
+        actual players. Each entry documents not just what I built —
+        but a specific design decision I made and what happened as a result.
+        That accountability is how I measure my own growth as a designer.
+      </p>
+    </div>
+
+    <div class="projects-grid">
+
+      <!-- FEATURED: VigaFun Work -->
+      <div class="project-card featured reveal">
+        <div class="project-main">
+          <p class="project-tag"><span class="tag-dot"></span> VigaFun — July 2025 – Present</p>
+          <h3 class="project-title">Color Knitzy</h3>
+          <p class="project-studio">Published Mobile Game · VigaFun Studio</p>
+          <p class="project-desc">
+            A colour-matching mobile title where I led level design and
+            gameplay systems across the full production pipeline. My role
+            spanned mechanic specification, difficulty curve architecture,
+            and feature iteration grounded in live retention data.
+          </p>
+          <div class="design-decision">
+            <p class="decision-label">↳ Design Decision &amp; Outcome</p>
+            <p class="decision-text">
+              Playtesting revealed that players were dropping the game not
+              because of the core mechanics — which functioned as intended —
+              but because of advertisement pacing. I proposed adjusting the
+              frequency and placement of ads rather than lengthening level
+              content. Subsequent updates showed measurable improvement in
+              player retention. This is the kind of decision that is invisible
+              unless you read the data rather than trust your assumptions.
+            </p>
+          </div>
+          <div class="project-role-list">
+            <span class="role-tag">Level Design</span>
+            <span class="role-tag">Systems Design</span>
+            <span class="role-tag">Mechanic Specification</span>
+            <span class="role-tag">Retention Analysis</span>
+            <span class="role-tag">GDD Authoring</span>
+          </div>
+        </div>
+
+        <div class="project-sidebar">
+          <div class="sidebar-stat">
+            <p class="sidebar-stat-label">Platform</p>
+            <p class="sidebar-stat-value">iOS &amp; Android</p>
+          </div>
+          <div class="sidebar-stat">
+            <p class="sidebar-stat-label">Status</p>
+            <p class="sidebar-stat-value" style="font-size:1.2rem;color:var(--text)">Published &amp; Live</p>
+            <p class="sidebar-stat-sub">Available on app stores</p>
+          </div>
+          <div class="sidebar-stat">
+            <p class="sidebar-stat-label">Design Focus</p>
+            <p class="sidebar-stat-value" style="font-size:1.1rem;color:var(--text)">Retention &amp; Pacing</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pixel Dom -->
+      <div class="project-card reveal">
+        <p class="project-tag"><span class="tag-dot"></span> VigaFun — 2025</p>
+        <h3 class="project-title">Pixel Dom</h3>
+        <p class="project-studio">Published Mobile Game · VigaFun Studio</p>
+        <p class="project-desc">
+          A pixel-art mobile title where I designed and documented level
+          progressions, mechanic interactions, and feature sets. Worked
+          across disciplines to align design intent with technical production
+          constraints, maintaining coherence between gameplay feel and
+          implementation scope.
+        </p>
+        <div class="design-decision">
+          <p class="decision-label">↳ Design Responsibility</p>
+          <p class="decision-text">
+            Designed cross-level progression systems balancing player
+            skill growth against difficulty spikes. Produced mechanic
+            documentation that served as the single source of truth for
+            both design and engineering during production.
+          </p>
+        </div>
+        <div class="project-role-list">
+          <span class="role-tag">Level Design</span>
+          <span class="role-tag">Feature Design</span>
+          <span class="role-tag">GDD Authoring</span>
+        </div>
+      </div>
+
+      <!-- Paper Flower -->
+      <div class="project-card reveal">
+        <p class="project-tag"><span class="tag-dot"></span> LacBird.co — Dec 2023 – Apr 2024</p>
+        <h3 class="project-title">Paper Flower</h3>
+        <p class="project-studio">Narrative Game · LacBird.co Studio</p>
+        <p class="project-desc">
+          My first professional project — a narrative-driven game where I
+          served as both narrative game designer and, unexpectedly, lead
+          designer and project coordinator for a four-person team.
+          This project is where I first discovered the gap between ambition
+          and preparation, and began learning to close it.
+        </p>
+        <div class="design-decision">
+          <p class="decision-label">↳ Lesson Learned</p>
+          <p class="decision-text">
+            I underestimated what leading a team actually required. Scope
+            definition, production structure, and cross-role communication
+            all suffered. The project stalled. Understanding why — and taking
+            responsibility for it — changed how I approach every project since.
+          </p>
+        </div>
+        <div class="project-role-list">
+          <span class="role-tag">Narrative Design</span>
+          <span class="role-tag">Project Lead</span>
+          <span class="role-tag">Story Integration</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     EXPERTISE
+     ═══════════════════════════════════════════════════ -->
+<section id="expertise">
+  <div class="container">
+    <p class="section-label">Expertise</p>
+    <h2 class="section-title">DESIGN<br>DISCIPLINES</h2>
+
+    <div class="expertise-grid">
+      <div class="expertise-item reveal" data-num="01">
+        <span class="exp-icon">⬡</span>
+        <h3 class="exp-title">Systems &amp; Gameplay Design</h3>
+        <p class="exp-desc">Designing the underlying structures that tie mechanics and player
+          experience together. Breaking down what makes existing systems work, then
+          proposing and documenting new ones. Difficulty curves, progression architecture,
+          and player learning pacing.</p>
+      </div>
+      <div class="expertise-item reveal" data-num="02">
+        <span class="exp-icon">◈</span>
+        <h3 class="exp-title">Level Design</h3>
+        <p class="exp-desc">Structuring spaces and sequences that teach players without
+          telling them. Cross-project experience across mobile constraints and
+          narrative environments. Balancing engagement, challenge, and cognitive
+          load through spatial and temporal design.</p>
+      </div>
+      <div class="expertise-item reveal" data-num="03">
+        <span class="exp-icon">◎</span>
+        <h3 class="exp-title">Narrative Integration</h3>
+        <p class="exp-desc">Creating story content that works fluently with mechanics rather
+          than sitting beside them. Experience at LacBird designing narrative that
+          respects player agency and serves gameplay function simultaneously.</p>
+      </div>
+      <div class="expertise-item reveal" data-num="04">
+        <span class="exp-icon">▤</span>
+        <h3 class="exp-title">Game Design Documentation</h3>
+        <p class="exp-desc">Authoring GDDs that serve as the source of truth across disciplines.
+          Mechanic specifications, feature briefs, iteration logs. Documentation
+          that engineers and artists can use without interpretation.</p>
+      </div>
+      <div class="expertise-item reveal" data-num="05">
+        <span class="exp-icon">◐</span>
+        <h3 class="exp-title">Playtesting &amp; Iteration</h3>
+        <p class="exp-desc">Evidence-based iteration grounded in structured observation and
+          live data. Not adjusting from instinct — adjusting from what players
+          actually do, and documenting why the decision was made at each step.</p>
+      </div>
+      <div class="expertise-item reveal" data-num="06">
+        <span class="exp-icon">△</span>
+        <h3 class="exp-title">Creative Direction</h3>
+        <p class="exp-desc">Film direction, cinematography, and visual storytelling
+          across short film and trailer projects. A cross-disciplinary sensibility
+          that informs how I think about player experience, atmosphere, and moment-to-moment feel.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     ACADEMIC PROJECTS
+     ═══════════════════════════════════════════════════ -->
+<section id="academic">
+  <div class="container">
+    <p class="section-label">Academic &amp; Extracurricular</p>
+    <h2 class="section-title">BUILT UNDER<br>CONSTRAINT</h2>
+
+    <div class="academic-list reveal">
+
+      <div class="academic-item">
+        <div class="acad-year">23</div>
+        <div>
+          <p class="acad-role">Game Designer · BUV Game Jam 2023</p>
+          <h4 class="acad-title">BUV Game Jam 2023</h4>
+          <p class="acad-desc">
+            Sole game designer across a full game jam cycle. Responsible for
+            mechanic design, asset integration briefs, and quality control under
+            competitive time pressure. Demonstrates solo design decision-making
+            and scope management when the production clock is running.
+          </p>
+          <div class="acad-skills">
+            <span class="skill-chip">Rapid Prototyping</span>
+            <span class="skill-chip">Scope Management</span>
+            <span class="skill-chip">Solo Decision-Making</span>
+            <span class="skill-chip">Playtesting</span>
+          </div>
+        </div>
+        <span class="acad-badge">Game Jam</span>
+      </div>
+
+      <div class="academic-item">
+        <div class="acad-year">22</div>
+        <div>
+          <p class="acad-role">Game Designer &amp; Programmer · BUV Game Jam 2022</p>
+          <h4 class="acad-title">BUV Game Jam 2022</h4>
+          <p class="acad-desc">
+            First game jam experience — dual role spanning design and programming.
+            Built foundational skills in rapid iteration, interdisciplinary
+            communication, and designing within technical constraints you also have
+            to build. Learned that design and implementation cannot be fully separated.
+          </p>
+          <div class="acad-skills">
+            <span class="skill-chip">Cross-Discipline</span>
+            <span class="skill-chip">Rapid Iteration</span>
+            <span class="skill-chip">Game Design Doc</span>
+            <span class="skill-chip">Time Pressure</span>
+          </div>
+        </div>
+        <span class="acad-badge">Game Jam</span>
+      </div>
+
+      <div class="academic-item">
+        <div class="acad-year">24</div>
+        <div>
+          <p class="acad-role">Director &amp; Producer · BUV Final Year</p>
+          <h4 class="acad-title">"A Journey to Peace" — Short Film</h4>
+          <p class="acad-desc">
+            End-to-end creative direction of an original short film. Responsible for
+            script, cinematography, shot composition, and pacing. A cross-medium
+            storytelling project that directly informs how I approach player experience —
+            both are about controlling attention, emotion, and the feeling of moving
+            through a designed space.
+          </p>
+          <div class="acad-skills">
+            <span class="skill-chip">Creative Direction</span>
+            <span class="skill-chip">Screenwriting</span>
+            <span class="skill-chip">Pacing &amp; Structure</span>
+            <span class="skill-chip">Visual Storytelling</span>
+          </div>
+        </div>
+        <span class="acad-badge">Film</span>
+      </div>
+
+      <div class="academic-item">
+        <div class="acad-year">23</div>
+        <div>
+          <p class="acad-role">Event Organiser · BUV Photography Club</p>
+          <h4 class="acad-title">Catch Your Glimpse — Photography Event</h4>
+          <p class="acad-desc">
+            Coordinated a campus photography event end-to-end: logistics, team
+            communication, creative briefing, and execution. Demonstrates the
+            ability to translate a creative vision into organised production —
+            a skill that transfers directly into leading game design work.
+          </p>
+          <div class="acad-skills">
+            <span class="skill-chip">Event Coordination</span>
+            <span class="skill-chip">Cross-Team Communication</span>
+            <span class="skill-chip">Creative Direction</span>
+          </div>
+        </div>
+        <span class="acad-badge">Event</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     PROCESS / DOCUMENTS — PLACEHOLDER
+     ADD YOUR GDDs, VIDEOS, AND PLAYTEST NOTES HERE
+     ═══════════════════════════════════════════════════ -->
+<section id="process">
+  <div class="container">
+    <p class="section-label">Design Process</p>
+    <h2 class="section-title">HOW I<br>THINK</h2>
+    <p style="color:var(--text-2);margin-top:1rem;max-width:620px;font-size:0.93rem;line-height:1.75;">
+      The sections below are reserved for design process documentation —
+      the work that shows <em>how</em> a design came to be, not just what it became.
+      This is the most critical section for a postgraduate application.
+    </p>
+
+    <div class="process-note">
+
+      <div class="process-placeholder reveal">
+        <div class="placeholder-icon">📄</div>
+        <p class="placeholder-title">Game Design Documents</p>
+        <p class="placeholder-desc">
+          Upload GDDs from Color Knitzy, Pixel Dom, or Paper Flower here.
+          Even a 3–5 page mechanic specification with diagrams is more
+          persuasive than any finished screenshot.
+        </p>
+        <span class="placeholder-tip">↳ Critical for Abertay 2:2 applicants</span>
+      </div>
+
+      <div class="process-placeholder reveal">
+        <div class="placeholder-icon">🎬</div>
+        <p class="placeholder-title">Promo &amp; Walkthrough Videos</p>
+        <p class="placeholder-desc">
+          Embed gameplay footage, trailer videos, or screen-recorded
+          walkthroughs of your prototypes here. Show the game in motion,
+          not just in screenshots.
+        </p>
+        <span class="placeholder-tip">↳ Embed YouTube / Vimeo links</span>
+      </div>
+
+      <div class="process-placeholder reveal">
+        <div class="placeholder-icon">🔁</div>
+        <p class="placeholder-title">Iteration Logs</p>
+        <p class="placeholder-desc">
+          Document a single mechanic across 3 iterations: what you tried,
+          what the playtest revealed, what you changed, and why. This
+          single exercise can distinguish a 2:2 applicant from a 2:1.
+        </p>
+        <span class="placeholder-tip">↳ Abertay DES510 is built on this</span>
+      </div>
+
+      <div class="process-placeholder reveal">
+        <div class="placeholder-icon">📐</div>
+        <p class="placeholder-title">System Diagrams</p>
+        <p class="placeholder-desc">
+          Visual representations of game systems — flow charts, mechanic
+          dependency maps, difficulty progression graphs. Shows you can
+          communicate design logic visually, not just verbally.
+        </p>
+        <span class="placeholder-tip">↳ Shows systems design literacy</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     VISION
+     ═══════════════════════════════════════════════════ -->
+<section id="vision">
+  <div class="container">
+    <p class="section-label">Direction</p>
+
+    <div class="vision-content reveal">
+      <h2 class="vision-statement">
+        Return to<br>Vietnam.<br>
+        <em>Raise the<br>standard.</em>
+      </h2>
+
+      <div class="vision-details">
+        <p>
+          Vietnam's games industry is growing — but it remains largely shaped
+          by <strong>mobile market constraints</strong>. I have worked inside those
+          constraints at VigaFun, and I understand them well enough to know
+          that changing them requires people who have operated at an entirely
+          different level.
+        </p>
+        <p>
+          My goal is not to become a better designer within the context I already
+          know. It is to develop the expertise, the network, and the professional
+          authority to <strong>lead teams that set a new standard</strong> —
+          not adapt to the existing one.
+        </p>
+        <p>
+          Postgraduate study at Abertay is the most direct path I have found
+          toward that goal. The studio-based MProf structure, the emphasis on
+          reflective practice and production realism, and the collaborative
+          international environment are exactly what this next stage requires.
+        </p>
+        <a href="mailto:thanhdang210203@gmail.com" class="btn-primary" style="margin-top:1.5rem;display:inline-block;">
+          Let's Talk
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     CONTACT
+     ═══════════════════════════════════════════════════ -->
+<section id="contact">
+  <div class="container">
+    <p class="section-label">Contact</p>
+    <h2 class="contact-heading">GET IN<br>TOUCH</h2>
+    <p class="contact-sub">
+      Open to collaborations, feedback on work, or conversations about
+      game design, systems, and the Vietnamese games industry.
+    </p>
+    <div class="contact-links">
+      <a href="mailto:thanhdang210203@gmail.com" class="contact-link">
+        <span>✉</span> thanhdang210203@gmail.com
+      </a>
+      <a href="https://linkedin.com/in/dangcongthanh" target="_blank" class="contact-link">
+        <span>↗</span> LinkedIn
+      </a>
+      <a href="https://linktr.ee/thanhdang2102" target="_blank" class="contact-link">
+        <span>↗</span> Linktree
+      </a>
+      <a href="https://500px.com/p/thanhhdang" target="_blank" class="contact-link">
+        <span>↗</span> Photography
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 Đặng Công Thành — Game Designer</p>
+  <p>Hanoi, Vietnam &nbsp;·&nbsp; IELTS 7.0 &nbsp;·&nbsp; Available for postgraduate study 2026</p>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════ -->
+<script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  cursor.style.left = mouseX + 'px';
+  cursor.style.top  = mouseY + 'px';
+});
+
+// Ring follows with lag
+(function animateRing() {
+  ringX += (mouseX - ringX) * 0.12;
+  ringY += (mouseY - ringY) * 0.12;
+  ring.style.left = ringX + 'px';
+  ring.style.top  = ringY + 'px';
+  requestAnimationFrame(animateRing);
+})();
+
+// Cursor expand on hover
+document.querySelectorAll('a, button').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    ring.style.width = '56px';
+    ring.style.height = '56px';
+    ring.style.opacity = '0.6';
+  });
+  el.addEventListener('mouseleave', () => {
+    ring.style.width = '36px';
+    ring.style.height = '36px';
+    ring.style.opacity = '0.4';
+  });
+});
+
+// Nav scroll effect
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      // Stagger siblings
+      const siblings = [...entry.target.parentElement.children].filter(c => c.classList.contains('reveal'));
+      const idx = siblings.indexOf(entry.target);
+      setTimeout(() => {
+        entry.target.classList.add('visible');
+      }, idx * 80);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
