@@ -638,18 +638,186 @@ h2.st{font-family:var(--font);font-weight:900;
   font-family:var(--mono);font-size:.52rem;color:var(--text-3);
   letter-spacing:.14em;z-index:9001;}
 
-/* ── RESPONSIVE ── */
-@media(max-width:860px){
-  .ph-grid,.proj-grid,.vg,.pps{grid-template-columns:1fr;}
-  .egrid{grid-template-columns:1fr 1fr;}
-  .ai{grid-template-columns:1fr;gap:.6rem;}
-  .pgr{grid-template-columns:1fr;}
-  .tl{display:none;}
-  body,a,.btn,.da,.dot{cursor:auto;}
-  .cur,.cur-r{display:none;}
-  .side-nav{display:none;}
+/* ── RESPONSIVE ───────────────────────────────────────────────
+   Strategy:
+   · Desktop (>1024px) — original full racing layout
+   · Tablet  (≤1024px) — 2-col grids, scaled type
+   · Mobile  (≤720px)  — single-column, dvh heights, free scroll,
+                         decorative HUD/tacho/g-meter hidden
+   · Landscape phone (max-height:500px) — compact hero
+   · Wide aspect (≥21:9) — widen content rail
+   ──────────────────────────────────────────────────────────── */
+
+/* Use dynamic viewport height where supported (handles mobile address-bar) */
+@supports(height:100dvh){
+  .slide{height:100dvh;}
 }
-@media(max-width:560px){.egrid{grid-template-columns:1fr;}}
+
+/* ── TABLET & SMALL LAPTOP (≤1024px) ── */
+@media(max-width:1024px){
+  .egrid{grid-template-columns:repeat(2,1fr);}
+  .pgr{grid-template-columns:repeat(2,1fr);}
+  .hn{font-size:clamp(3.5rem,11vw,7rem);}
+  .slide{padding:5rem clamp(1.2rem,4vw,3rem) 3.5rem;}
+}
+
+/* ── TABLET PORTRAIT / LARGE PHONE (≤860px) ── */
+@media(max-width:860px){
+  /* Layout collapses */
+  .ph-grid,.proj-grid,.vg{grid-template-columns:1fr;gap:1.5rem;}
+  .pps{grid-template-columns:1fr 1fr;}
+  .ai{grid-template-columns:1fr;gap:.6rem;padding:1.1rem 1.2rem;}
+  .pgr{grid-template-columns:1fr;}
+
+  /* Disable custom cursor on touch — use native */
+  body,a,.btn,.da,.dot,.cl,.lb-close,.lb-prev,.lb-next,
+  .knitzy-store-card,.vid-item,.diag-item{cursor:auto;}
+  .cur,.cur-r{display:none;}
+
+  /* Hide desktop-only nav, show only the logo */
+  .tl{display:none;}
+  .side-nav{display:none;}
+
+  /* Slide padding tightens */
+  .slide{padding:4.5rem 1.2rem 3.5rem;}
+
+  /* Hero scales down */
+  .hn{font-size:clamp(2.8rem,10vw,5rem);line-height:1.05;}
+  .htag{font-size:.88rem;}
+  .hmeta{gap:1.3rem;margin-top:1.4rem;}
+  .hstat-n{font-size:1.5rem;}
+  .hstat-l{font-size:.54rem;}
+
+  /* Hide decorative racing HUD on mobile — too noisy on small screens */
+  .hud{display:none;}
+  .g-meter{display:none;}
+  .slide-telem{display:none;}
+  .tacho{width:120%;padding-bottom:120%;top:-40%;right:-40%;opacity:.5;}
+
+  /* Knitzy store card stacks vertically and centers */
+  .knitzy-store-card{flex-direction:column;align-items:center;text-align:center;
+    padding:1.3rem 1.1rem;}
+  .knitzy-info{align-items:center;}
+  .store-badges,.store-stats{justify-content:center;}
+
+  /* Video & diagram grids: 2-col on tablet portrait */
+  .vid-grid{grid-template-columns:repeat(2,1fr);}
+  .vid-thumb{height:110px;}
+  .diag-grid{grid-template-columns:1fr 1fr;}
+
+  /* Process cards drop min-height — let content size them */
+  .ph2{min-height:auto;padding:1.4rem 1.3rem;}
+
+  /* Contact links wrap nicely */
+  .cl{font-size:.6rem;padding:.55rem .9rem;}
+
+  /* Smaller down-arrow */
+  .da{bottom:1.2rem;}
+  .da-l{height:28px;}
+}
+
+/* ── MOBILE PORTRAIT (≤640px, includes 9:16 / 9:19.5 / 9:21) ── */
+@media(max-width:640px){
+  /* Free-scroll on small phones — scroll-snap mandatory traps users
+     when slide content exceeds viewport height */
+  html{scroll-snap-type:none;}
+  .slide{height:auto;min-height:100vh;min-height:100dvh;
+    padding:4.5rem 1rem 3rem;scroll-snap-align:none;}
+
+  /* Single-column everywhere */
+  .egrid{grid-template-columns:1fr;}
+  .pps{grid-template-columns:1fr;}
+  .vid-grid{grid-template-columns:1fr;}
+  .vid-thumb{height:180px;}
+  .diag-grid{grid-template-columns:1fr;}
+
+  /* Nav logo tighter */
+  .topbar{padding:.7rem 1rem;}
+  .nav-logo{font-size:.6rem;padding:.25rem .55rem;}
+
+  /* Hero */
+  .hey{font-size:.6rem;margin-bottom:1rem;}
+  .hn{font-size:clamp(2.4rem,11vw,3.6rem);margin-bottom:1rem;}
+  .htag{font-size:.82rem;padding-left:.9rem;}
+  .hmeta{gap:1rem 1.4rem;margin-top:1.2rem;}
+  .hstat-n{font-size:1.3rem;}
+  .hcta{flex-direction:column;align-items:stretch;width:100%;gap:.6rem;}
+  .hcta .btn{justify-content:center;}
+
+  /* Section headings */
+  h2.st{font-size:clamp(1.8rem,7.5vw,2.6rem);}
+  .ptitle{font-size:clamp(1.7rem,8vw,2.4rem);}
+  .chead{font-size:clamp(2.2rem,9vw,3.4rem);}
+  .vs{font-size:clamp(1.5rem,6.5vw,2.2rem);}
+
+  /* Philosophy quote */
+  .q-vi{font-size:clamp(1.2rem,5vw,1.6rem);}
+  .ph-q{padding:1.4rem;}
+  .ph-body h3{font-size:clamp(1.2rem,5.5vw,1.6rem);}
+
+  /* Cards & cells tighter */
+  .ei{padding:1.2rem 1.1rem;}
+  .ei::after{font-size:3.8rem;}
+
+  /* Counter & arrow */
+  .slide-counter{font-size:.52rem;bottom:.9rem;left:1rem;}
+  .da{display:none;}
+
+  /* Ticker smaller */
+  .tick-item{font-size:.52rem;}
+  .ticker{padding:.55rem 0;}
+
+  /* Contact links stack full-width */
+  .clinks{flex-direction:column;align-items:center;}
+  .cl{width:100%;max-width:340px;justify-content:center;}
+
+  /* Lightboxes — fit phone screens */
+  .lb-img{max-width:94vw;max-height:78vh;}
+  .vlb-player{max-width:94vw;max-height:60vh;}
+  .lb-close{top:.8rem;right:.8rem;width:32px;height:32px;font-size:.85rem;}
+  .lb-prev,.lb-next{width:36px;height:36px;font-size:1.1rem;}
+  .lb-prev{left:.5rem;}.lb-next{right:.5rem;}
+}
+
+/* ── VERY SMALL (≤380px — older / compact phones) ── */
+@media(max-width:380px){
+  .hn{font-size:clamp(2rem,10vw,2.8rem);}
+  .hmeta{gap:.8rem 1.1rem;}
+  .ptags,.achips{gap:.25rem;}
+  .slide{padding:4.2rem .85rem 2.5rem;}
+}
+
+/* ── LANDSCAPE PHONE (low height, wide) ── */
+@media(max-height:520px) and (orientation:landscape){
+  html{scroll-snap-type:none;}
+  .slide{height:auto;min-height:100vh;min-height:100dvh;
+    padding:3.5rem 1.5rem 2rem;scroll-snap-align:none;}
+  .hn{font-size:clamp(2rem,7vw,3.2rem);margin-bottom:.7rem;}
+  .hey{margin-bottom:.6rem;}
+  .htag{font-size:.78rem;}
+  .hmeta{margin-top:.9rem;gap:.8rem 1.4rem;}
+  .hstat-n{font-size:1.2rem;}
+  .hud,.g-meter,.slide-telem,.tacho,.da{display:none;}
+  .topbar{padding:.5rem 1rem;}
+  h2.st{font-size:clamp(1.6rem,5vw,2.2rem);}
+}
+
+/* ── WIDE / ULTRAWIDE (≥21:9 on large screens) ── */
+@media(min-aspect-ratio:18/9) and (min-width:1600px){
+  .sw{max-width:1400px;}
+  .hn{font-size:clamp(5rem,9vw,9rem);}
+}
+
+/* ── REDUCED MOTION — respect OS preference ── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+  .scan,.sl,.sline,.tacho-inner,.tacho{animation:none !important;}
+}
 </style>
 </head>
 <body>
@@ -1251,10 +1419,21 @@ function upd(){
   ctr.textContent=String(current+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');
 }
 
-/* ── Intersection observer ── */
+/* ── Intersection observer ──
+   Adaptive threshold: when a slide is taller than the viewport
+   (common on mobile — e.g. the Process slide has 4 cards + videos
+   + diagrams stacked single-column), the max possible intersection
+   ratio is viewport/slideHeight, which can be far below .4. Without
+   adapting, the .anim elements never get the .in class and the
+   whole section stays invisible. */
 const io=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
-    if(e.isIntersecting&&e.intersectionRatio>.4){
+    if(!e.isIntersecting)return;
+    const slideH=e.target.offsetHeight||1;
+    const vh=window.innerHeight||1;
+    const maxRatio=Math.min(1,vh/slideH);
+    const trigger=Math.min(.4,maxRatio*.5);
+    if(e.intersectionRatio>=trigger){
       current=slides.indexOf(e.target);
       upd();
       /* slide left-border + telemetry reveal */
@@ -1268,8 +1447,26 @@ const io=new IntersectionObserver(entries=>{
       });
     }
   });
-},{threshold:.4});
+},{threshold:[0,.1,.2,.3,.4,.5,.6]});
 slides.forEach(s=>io.observe(s));
+
+/* Safety fallback — if a slide somehow never crosses its trigger
+   threshold (rare orientation edge cases), reveal everything after
+   a brief scroll. Mobile-only, won't affect desktop animation. */
+if(window.matchMedia('(max-width:640px)').matches){
+  let revealed=false;
+  const revealAll=()=>{
+    if(revealed)return;
+    revealed=true;
+    document.querySelectorAll('.anim,.anim-grid').forEach(el=>el.classList.add('in'));
+    document.querySelectorAll('.slide').forEach(el=>el.classList.add('in-view'));
+  };
+  /* If user scrolls past the first viewport without all animations firing */
+  setTimeout(()=>{
+    const hidden=document.querySelectorAll('.anim:not(.in),.anim-grid:not(.in)');
+    if(hidden.length>3)revealAll();
+  },4000);
+}
 
 /* ── Keyboard ── */
 document.addEventListener('keydown',e=>{
