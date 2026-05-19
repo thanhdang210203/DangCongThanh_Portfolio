@@ -569,23 +569,284 @@ h2.st{font-family:var(--font);font-weight:900;
 .store-stats .ss-acc{color:var(--acc);}
 .store-stats .ss-sep{color:var(--text-3);}
 
-/* ── RESPONSIVE ── */
-@media(max-width:860px){
-  .ph-grid,.proj-grid,.vg,.pps{grid-template-columns:1fr;}
-  .egrid{grid-template-columns:1fr 1fr;}
-  .ai{grid-template-columns:1fr;gap:.6rem;}
-  .pgr{grid-template-columns:1fr;}
-  .tl{display:none;}
-  body,a,.btn,.da,.dot{cursor:auto;}
-  .cur,.cur-r{display:none;}
-  .side-nav{display:none;}
+/* ── GAMEPLAY VIDEO GRID ── */
+.vid-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-top:.6rem;}
+.vid-item{position:relative;display:flex;flex-direction:column;cursor:none;
+  border:1px solid var(--border);transition:border-color .2s;overflow:hidden;}
+.vid-item:hover{border-color:var(--acc);}
+.vid-thumb{width:100%;height:80px;object-fit:cover;display:block;
+  opacity:.7;transition:opacity .2s;}
+.vid-item:hover .vid-thumb{opacity:1;}
+.vid-play{position:absolute;top:calc(50% - 10px);left:50%;
+  transform:translate(-50%,-50%);
+  width:28px;height:28px;background:rgba(232,160,32,.9);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.6rem;color:#000;pointer-events:none;
+  clip-path:polygon(0 0,calc(100% - 4px) 0,100% 4px,100% 100%,0 100%);}
+/* Video lightbox player */
+.vlb-player{max-width:88vw;max-height:72vh;display:block;
+  background:#000;outline:none;border:1px solid var(--border);}
+
+/* ── SYSTEM DIAGRAMS GRID ── */
+.diag-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.6rem;}
+.diag-item{display:flex;flex-direction:column;cursor:none;
+  border:1px solid var(--border);transition:border-color .2s;}
+.diag-item:hover{border-color:var(--acc);}
+.diag-item img{width:100%;height:auto;display:block;
+  opacity:.75;transition:opacity .2s;}
+.diag-item:hover img{opacity:1;}
+.diag-label{font-family:var(--mono);font-size:.46rem;color:var(--text-2);
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:.28rem .4rem;background:var(--surface2);
+  border-top:1px solid var(--border);}
+
+/* ── LIGHTBOX ── */
+.lb-overlay{position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,.93);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease;}
+.lb-overlay.lb-open{opacity:1;pointer-events:all;}
+.lb-overlay.lb-closing{opacity:0;}
+.lb-content{display:flex;flex-direction:column;align-items:center;
+  transform:scale(.72);
+  transition:transform .38s cubic-bezier(.22,1,.36,1),opacity .38s ease;}
+.lb-overlay.lb-open .lb-content{transform:scale(1);}
+.lb-overlay.lb-closing .lb-content{transform:scale(.72);}
+.lb-img{max-width:88vw;max-height:72vh;object-fit:contain;display:block;
+  border:1px solid var(--border);
+  transition:opacity .15s ease;}
+.lb-caption{font-family:var(--mono);font-size:.58rem;color:var(--text-2);
+  letter-spacing:.1em;text-transform:uppercase;
+  margin-top:.75rem;text-align:center;}
+.lb-close{position:fixed;top:1.4rem;right:1.4rem;z-index:9001;
+  background:transparent;border:1px solid var(--border);color:var(--text);
+  font-size:.95rem;cursor:none;width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .2s,color .2s;
+  clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,0 100%);}
+.lb-close:hover{border-color:var(--acc);color:var(--acc);}
+.lb-prev,.lb-next{position:fixed;top:50%;transform:translateY(-50%);z-index:9001;
+  background:rgba(10,10,10,.7);border:1px solid var(--border);color:var(--text);
+  font-size:1.4rem;cursor:none;width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .2s,color .2s;}
+.lb-prev{left:1.4rem;}
+.lb-next{right:1.4rem;}
+.lb-prev:hover,.lb-next:hover{border-color:var(--acc);color:var(--acc);}
+.lb-counter{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:.52rem;color:var(--text-3);
+  letter-spacing:.14em;z-index:9001;}
+
+/* ── RESPONSIVE ───────────────────────────────────────────────
+   Strategy:
+   · Desktop (>1024px) — original full racing layout
+   · Tablet  (≤1024px) — 2-col grids, scaled type
+   · Mobile  (≤720px)  — single-column, dvh heights, free scroll,
+                         decorative HUD/tacho/g-meter hidden
+   · Landscape phone (max-height:500px) — compact hero
+   · Wide aspect (≥21:9) — widen content rail
+   ──────────────────────────────────────────────────────────── */
+
+/* Use dynamic viewport height where supported (handles mobile address-bar) */
+@supports(height:100dvh){
+  .slide{height:100dvh;}
 }
-@media(max-width:560px){.egrid{grid-template-columns:1fr;}}
+
+/* ── TABLET & SMALL LAPTOP (≤1024px) ── */
+@media(max-width:1024px){
+  .egrid{grid-template-columns:repeat(2,1fr);}
+  .pgr{grid-template-columns:repeat(2,1fr);}
+  .hn{font-size:clamp(3.5rem,11vw,7rem);}
+  .slide{padding:5rem clamp(1.2rem,4vw,3rem) 3.5rem;}
+}
+
+/* ── TABLET PORTRAIT / LARGE PHONE (≤860px) ── */
+@media(max-width:860px){
+  /* Layout collapses */
+  .ph-grid,.proj-grid,.vg{grid-template-columns:1fr;gap:1.5rem;}
+  .pps{grid-template-columns:1fr 1fr;}
+  .ai{grid-template-columns:1fr;gap:.6rem;padding:1.1rem 1.2rem;}
+  .pgr{grid-template-columns:1fr;}
+
+  /* Disable custom cursor on touch — use native */
+  body,a,.btn,.da,.dot,.cl,.lb-close,.lb-prev,.lb-next,
+  .knitzy-store-card,.vid-item,.diag-item{cursor:auto;}
+  .cur,.cur-r{display:none;}
+
+  /* Hide desktop-only nav, show only the logo */
+  .tl{display:none;}
+  .side-nav{display:none;}
+
+  /* Slide padding tightens */
+  .slide{padding:4.5rem 1.2rem 3.5rem;}
+
+  /* Hero scales down */
+  .hn{font-size:clamp(2.8rem,10vw,5rem);line-height:1.05;}
+  .htag{font-size:.88rem;}
+  .hmeta{gap:1.3rem;margin-top:1.4rem;}
+  .hstat-n{font-size:1.5rem;}
+  .hstat-l{font-size:.54rem;}
+
+  /* Hide decorative racing HUD on mobile — too noisy on small screens */
+  .hud{display:none;}
+  .g-meter{display:none;}
+  .slide-telem{display:none;}
+  .tacho{width:120%;padding-bottom:120%;top:-40%;right:-40%;opacity:.5;}
+
+  /* Knitzy store card stacks vertically and centers */
+  .knitzy-store-card{flex-direction:column;align-items:center;text-align:center;
+    padding:1.3rem 1.1rem;}
+  .knitzy-info{align-items:center;}
+  .store-badges,.store-stats{justify-content:center;}
+
+  /* Video & diagram grids: 2-col on tablet portrait */
+  .vid-grid{grid-template-columns:repeat(2,1fr);}
+  .vid-thumb{height:110px;}
+  .diag-grid{grid-template-columns:1fr 1fr;}
+
+  /* Process cards drop min-height — let content size them */
+  .ph2{min-height:auto;padding:1.4rem 1.3rem;}
+
+  /* Contact links wrap nicely */
+  .cl{font-size:.6rem;padding:.55rem .9rem;}
+
+  /* Smaller down-arrow */
+  .da{bottom:1.2rem;}
+  .da-l{height:28px;}
+}
+
+/* ── MOBILE PORTRAIT (≤640px, includes 9:16 / 9:19.5 / 9:21) ── */
+@media(max-width:640px){
+  /* Free-scroll on small phones — scroll-snap mandatory traps users
+     when slide content exceeds viewport height */
+  html{scroll-snap-type:none;}
+  .slide{height:auto;min-height:100vh;min-height:100dvh;
+    padding:4.5rem 1rem 3rem;scroll-snap-align:none;}
+
+  /* Single-column everywhere */
+  .egrid{grid-template-columns:1fr;}
+  .pps{grid-template-columns:1fr;}
+  .vid-grid{grid-template-columns:1fr;}
+  .vid-thumb{height:180px;}
+  .diag-grid{grid-template-columns:1fr;}
+
+  /* Nav logo tighter */
+  .topbar{padding:.7rem 1rem;}
+  .nav-logo{font-size:.6rem;padding:.25rem .55rem;}
+
+  /* Hero */
+  .hey{font-size:.6rem;margin-bottom:1rem;}
+  .hn{font-size:clamp(2.4rem,11vw,3.6rem);margin-bottom:1rem;}
+  .htag{font-size:.82rem;padding-left:.9rem;}
+  .hmeta{gap:1rem 1.4rem;margin-top:1.2rem;}
+  .hstat-n{font-size:1.3rem;}
+  .hcta{flex-direction:column;align-items:stretch;width:100%;gap:.6rem;}
+  .hcta .btn{justify-content:center;}
+
+  /* Section headings */
+  h2.st{font-size:clamp(1.8rem,7.5vw,2.6rem);}
+  .ptitle{font-size:clamp(1.7rem,8vw,2.4rem);}
+  .chead{font-size:clamp(2.2rem,9vw,3.4rem);}
+  .vs{font-size:clamp(1.5rem,6.5vw,2.2rem);}
+
+  /* Philosophy quote */
+  .q-vi{font-size:clamp(1.2rem,5vw,1.6rem);}
+  .ph-q{padding:1.4rem;}
+  .ph-body h3{font-size:clamp(1.2rem,5.5vw,1.6rem);}
+
+  /* Cards & cells tighter */
+  .ei{padding:1.2rem 1.1rem;}
+  .ei::after{font-size:3.8rem;}
+
+  /* Counter & arrow */
+  .slide-counter{font-size:.52rem;bottom:.9rem;left:1rem;}
+  .da{display:none;}
+
+  /* Ticker smaller */
+  .tick-item{font-size:.52rem;}
+  .ticker{padding:.55rem 0;}
+
+  /* Contact links stack full-width */
+  .clinks{flex-direction:column;align-items:center;}
+  .cl{width:100%;max-width:340px;justify-content:center;}
+
+  /* Lightboxes — fit phone screens */
+  .lb-img{max-width:94vw;max-height:78vh;}
+  .vlb-player{max-width:94vw;max-height:60vh;}
+  .lb-close{top:.8rem;right:.8rem;width:32px;height:32px;font-size:.85rem;}
+  .lb-prev,.lb-next{width:36px;height:36px;font-size:1.1rem;}
+  .lb-prev{left:.5rem;}.lb-next{right:.5rem;}
+}
+
+/* ── VERY SMALL (≤380px — older / compact phones) ── */
+@media(max-width:380px){
+  .hn{font-size:clamp(2rem,10vw,2.8rem);}
+  .hmeta{gap:.8rem 1.1rem;}
+  .ptags,.achips{gap:.25rem;}
+  .slide{padding:4.2rem .85rem 2.5rem;}
+}
+
+/* ── LANDSCAPE PHONE (low height, wide) ── */
+@media(max-height:520px) and (orientation:landscape){
+  html{scroll-snap-type:none;}
+  .slide{height:auto;min-height:100vh;min-height:100dvh;
+    padding:3.5rem 1.5rem 2rem;scroll-snap-align:none;}
+  .hn{font-size:clamp(2rem,7vw,3.2rem);margin-bottom:.7rem;}
+  .hey{margin-bottom:.6rem;}
+  .htag{font-size:.78rem;}
+  .hmeta{margin-top:.9rem;gap:.8rem 1.4rem;}
+  .hstat-n{font-size:1.2rem;}
+  .hud,.g-meter,.slide-telem,.tacho,.da{display:none;}
+  .topbar{padding:.5rem 1rem;}
+  h2.st{font-size:clamp(1.6rem,5vw,2.2rem);}
+}
+
+/* ── WIDE / ULTRAWIDE (≥21:9 on large screens) ── */
+@media(min-aspect-ratio:18/9) and (min-width:1600px){
+  .sw{max-width:1400px;}
+  .hn{font-size:clamp(5rem,9vw,9rem);}
+}
+
+/* ── REDUCED MOTION — respect OS preference ── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+  .scan,.sl,.sline,.tacho-inner,.tacho{animation:none !important;}
+}
 </style>
 </head>
 <body>
 <div class="cur" id="c"></div>
 <div class="cur-r" id="cr"></div>
+
+<!-- Video Lightbox -->
+<div class="lb-overlay" id="vlb">
+  <button class="lb-close" id="vlb-close">✕</button>
+  <button class="lb-prev" id="vlb-prev">‹</button>
+  <button class="lb-next" id="vlb-next">›</button>
+  <div class="lb-content">
+    <video class="vlb-player" id="vlb-player" controls></video>
+    <p class="lb-caption" id="vlb-caption"></p>
+  </div>
+  <div class="lb-counter" id="vlb-counter"></div>
+</div>
+
+<!-- Image Lightbox -->
+<div class="lb-overlay" id="lb">
+  <button class="lb-close" id="lb-close">✕</button>
+  <button class="lb-prev" id="lb-prev">‹</button>
+  <button class="lb-next" id="lb-next">›</button>
+  <div class="lb-content">
+    <img class="lb-img" id="lb-img" src="" alt="">
+    <p class="lb-caption" id="lb-caption"></p>
+  </div>
+  <div class="lb-counter" id="lb-counter"></div>
+</div>
 
 <nav class="topbar">
   <div class="nav-logo">DCT — Portfolio</div>
@@ -716,7 +977,7 @@ h2.st{font-family:var(--font);font-weight:900;
       </div>
       <div class="ps-r anim">
         <div class="knitzy-store-card bracket">
-          <div class="knitzy-icon"><img src="../Images/ColorKnitzy Icon.png" alt="Color Knitzy" style="width:100%;height:100%;object-fit:cover;border-radius:16px;"></div>
+          <div class="knitzy-icon"><img src="https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Images/ColorKnitzy%20Icon.png" alt="Color Knitzy" style="width:100%;height:100%;object-fit:cover;border-radius:16px;"></div>
           <div class="knitzy-info">
             <div class="knitzy-title">Color Knitzy</div>
             <div class="knitzy-dev">VigaFun Studio</div>
@@ -727,8 +988,8 @@ h2.st{font-family:var(--font);font-weight:900;
               <span>5M+ downloads</span>
             </div>
             <div class="store-badges">
-              <a href="https://play.google.com/store/apps/details?id=com.funfinity.knitzy.thread" target="_blank"><img src="../Images/Google_Play_Store_badge_EN.png" alt="Get it on Google Play"></a>
-              <a href="https://apps.apple.com/us/app/color-knitzy/id6745220785?l=vi" target="_blank"><img src="../Images/Download_on_the_App_Store_Badge.png" alt="Download on the App Store"></a>
+              <a href="https://play.google.com/store/apps/details?id=com.funfinity.knitzy.thread" target="_blank"><img src="https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Images/Google_Play_Store_badge_EN.png" alt="Get it on Google Play"></a>
+              <a href="https://apps.apple.com/us/app/color-knitzy/id6745220785?l=vi" target="_blank"><img src="https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Images/Download_on_the_App_Store_Badge.png" alt="Download on the App Store"></a>
             </div>
           </div>
         </div>
@@ -767,7 +1028,7 @@ h2.st{font-family:var(--font);font-weight:900;
       </div>
       <div class="ps-r anim">
         <div class="knitzy-store-card bracket">
-          <div class="knitzy-icon"><img src="../Images/Pixeldom_Pop Blast.jpg" alt="Pixeldom: Pop Blast" style="width:100%;height:100%;object-fit:cover;border-radius:16px;"></div>
+          <div class="knitzy-icon"><img src="https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Images/Pixeldom_Pop%20Blast.jpg" alt="Pixeldom: Pop Blast" style="width:100%;height:100%;object-fit:cover;border-radius:16px;"></div>
           <div class="knitzy-info">
             <div class="knitzy-title">Pixeldom: Pop Blast</div>
             <div class="knitzy-dev">VigaFun Studio</div>
@@ -778,7 +1039,7 @@ h2.st{font-family:var(--font);font-weight:900;
               <span>10K+ downloads</span>
             </div>
             <div class="store-badges">
-              <a href="https://play.google.com/store/apps/details?id=com.vigafun.pixeldom.popblast" target="_blank"><img src="../Images/Google_Play_Store_badge_EN.png" alt="Get it on Google Play"></a>
+              <a href="https://play.google.com/store/apps/details?id=com.vigafun.pixeldom.popblast" target="_blank"><img src="https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Images/Google_Play_Store_badge_EN.png" alt="Get it on Google Play"></a>
             </div>
           </div>
         </div>
@@ -817,7 +1078,7 @@ h2.st{font-family:var(--font);font-weight:900;
       </div>
       <div class="ps-r anim">
         <div class="knitzy-store-card bracket">
-          <div class="knitzy-icon"><img src="../Images/puzzle_drop_master.jpg" alt="Puzzle Drop Master" style="width:100%;height:100%;object-fit:cover;border-radius:16px;"></div>
+          <div class="knitzy-icon"><img src="https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Images/puzzle_drop_master.jpg" alt="Puzzle Drop Master" style="width:100%;height:100%;object-fit:cover;border-radius:16px;"></div>
           <div class="knitzy-info">
             <div class="knitzy-title">Puzzle Drop Master</div>
             <div class="knitzy-dev">VigaFun Studio</div>
@@ -826,8 +1087,8 @@ h2.st{font-family:var(--font);font-weight:900;
               <span>10K+ downloads</span>
             </div>
             <div class="store-badges">
-              <a href="https://play.google.com/store/apps/details?id=com.vigafun.colorflow" target="_blank"><img src="../Images/Google_Play_Store_badge_EN.png" alt="Get it on Google Play"></a>
-              <a href="https://apps.apple.com/us/app/puzzle-drop-master/id6762814588?l=vi#productRatings" target="_blank"><img src="../Images/Download_on_the_App_Store_Badge.png" alt="Download on the App Store"></a>
+              <a href="https://play.google.com/store/apps/details?id=com.vigafun.colorflow" target="_blank"><img src="https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Images/Google_Play_Store_badge_EN.png" alt="Get it on Google Play"></a>
+              <a href="https://apps.apple.com/us/app/puzzle-drop-master/id6762814588?l=vi#productRatings" target="_blank"><img src="https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Images/Download_on_the_App_Store_Badge.png" alt="Download on the App Store"></a>
             </div>
           </div>
         </div>
@@ -851,7 +1112,7 @@ h2.st{font-family:var(--font);font-weight:900;
 <section class="slide" id="s-w3" data-label="Paper Flower">
   <!-- Video background layers -->
   <video class="pf-video" autoplay loop muted playsinline preload="auto">
-    <source src="../Video/Trailer_HoaDang_final_1.mp4" type="video/mp4">
+    <source src="https://media.githubusercontent.com/media/thanhdang210203/DangCongThanh_Portfolio/main/Video/Trailer_HoaDang_final_1.mp4" type="video/mp4">
   </video>
   <div class="pf-dim"></div>
   <div class="pf-vignette"></div>
@@ -935,9 +1196,46 @@ h2.st{font-family:var(--font);font-weight:900;
     <p class="anim" style="color:var(--text-2);font-size:.85rem;line-height:1.75;max-width:580px;margin-bottom:1.2rem;">Reserved for process documentation — how designs were developed, not just what they became.</p>
     <div class="pgr anim-grid">
       <div class="ph2 bracket"><span class="ph-ic">📄</span><p class="ph-t">Game Design Documents</p><p class="ph-d">GDDs from Color Knitzy, Pixel Dom, or Paper Flower. A 4–6 page mechanic specification with annotated diagrams shows what you designed, variables involved, and edge cases considered.</p><span class="ph-tip">↳ Critical for postgraduate portfolio evidence</span></div>
-      <div class="ph2 bracket"><span class="ph-ic">🎬</span><p class="ph-t">Gameplay Videos</p><p class="ph-d">Footage of shipped titles, prototype demos, or gameplay walkthroughs. Seeing design decisions in motion converts described competency into demonstrated competency.</p><span class="ph-tip">↳ Embed YouTube / Vimeo links</span></div>
+      <div class="ph2 bracket"><span class="ph-ic">🎬</span><p class="ph-t">Gameplay Videos</p>
+        <div class="vid-grid">
+          <div class="vid-item" onclick="vlbOpen(0)">
+            <video class="vid-thumb" src="https://media.githubusercontent.com/media/thanhdang210203/DangCongThanh_Portfolio/main/Video/Color%20Knitzy%20Gameplay.mp4" muted preload="metadata"></video>
+            <div class="vid-play">▶</div>
+            <div class="diag-label">Color Knitzy</div>
+          </div>
+          <div class="vid-item" onclick="vlbOpen(1)">
+            <video class="vid-thumb" src="https://media.githubusercontent.com/media/thanhdang210203/DangCongThanh_Portfolio/main/Video/Pixel%20Dom%20Pop%20Blast%20Gameplay.mp4" muted preload="metadata"></video>
+            <div class="vid-play">▶</div>
+            <div class="diag-label">Pixeldom: Pop Blast</div>
+          </div>
+          <div class="vid-item" onclick="vlbOpen(2)">
+            <video class="vid-thumb" src="https://media.githubusercontent.com/media/thanhdang210203/DangCongThanh_Portfolio/main/Video/Puzzle%20Drop%20Master%20Gameplay.mp4" muted preload="metadata"></video>
+            <div class="vid-play">▶</div>
+            <div class="diag-label">Puzzle Drop Master</div>
+          </div>
+        </div>
+        <span class="ph-tip">↳ Click any video to play</span></div>
       <div class="ph2 bracket"><span class="ph-ic">🔁</span><p class="ph-t">Iteration Logs</p><p class="ph-d">A single mechanic across three iterations: original design, what the playtest revealed, what you changed, and why. This one exercise shows design thinking more clearly than any polished portfolio piece.</p><span class="ph-tip">↳ Shows structured design thinking</span></div>
-      <div class="ph2 bracket"><span class="ph-ic">📐</span><p class="ph-t">System Diagrams</p><p class="ph-d">Mechanic dependency maps, difficulty curves, player decision flowcharts. Shows the ability to model design logic structurally — communicates systems literacy at a glance.</p><span class="ph-tip">↳ Demonstrates systems design vocabulary</span></div>
+      <div class="ph2 bracket"><span class="ph-ic">📐</span><p class="ph-t">System Diagrams</p>
+        <div class="diag-grid">
+          <div class="diag-item" onclick="lbOpen(0)">
+            <img src="https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Diagrams/Canyon%20Road.drawio.png" alt="Canyon Road">
+            <div class="diag-label">Canyon Road — Level Flow &amp; Pacing</div>
+          </div>
+          <div class="diag-item" onclick="lbOpen(1)">
+            <img src="https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Diagrams/Key%20Blaze%20(1).drawio.png" alt="Key Blaze">
+            <div class="diag-label">Key Blaze — Mechanic System Map</div>
+          </div>
+          <div class="diag-item" onclick="lbOpen(2)">
+            <img src="https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Diagrams/SkyLift%20(1).drawio.png" alt="SkyLift">
+            <div class="diag-label">SkyLift — Level Architecture Overview</div>
+          </div>
+          <div class="diag-item" onclick="lbOpen(3)">
+            <img src="https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Diagrams/StreakRace.drawio.png" alt="StreakRace">
+            <div class="diag-label">StreakRace — Player Decision Flowchart</div>
+          </div>
+        </div>
+        <span class="ph-tip">↳ Click any diagram to zoom in</span></div>
     </div>
   </div>
   <div class="da" onclick="goTo(9)"><div class="da-l"></div><span class="da-t">Next</span></div>
@@ -985,6 +1283,100 @@ h2.st{font-family:var(--font);font-weight:900;
 </section>
 
 <script>
+/* ── Video Lightbox ── */
+const vlbVids=[
+  {src:'https://media.githubusercontent.com/media/thanhdang210203/DangCongThanh_Portfolio/main/Video/Color%20Knitzy%20Gameplay.mp4',        caption:'Color Knitzy — Gameplay Footage'},
+  {src:'https://media.githubusercontent.com/media/thanhdang210203/DangCongThanh_Portfolio/main/Video/Pixel%20Dom%20Pop%20Blast%20Gameplay.mp4', caption:'Pixeldom: Pop Blast — Gameplay Footage'},
+  {src:'https://media.githubusercontent.com/media/thanhdang210203/DangCongThanh_Portfolio/main/Video/Puzzle%20Drop%20Master%20Gameplay.mp4',  caption:'Puzzle Drop Master — Gameplay Footage'}
+];
+let vlbIdx=0;
+const vlb=document.getElementById('vlb');
+const vlbPlayer=document.getElementById('vlb-player');
+const vlbCap=document.getElementById('vlb-caption');
+const vlbCtr=document.getElementById('vlb-counter');
+
+function vlbLoad(idx){
+  vlbPlayer.src=vlbVids[idx].src;
+  vlbCap.textContent=vlbVids[idx].caption;
+  vlbCtr.textContent=(idx+1)+' / '+vlbVids.length;
+  vlbPlayer.load();vlbPlayer.play();
+}
+function vlbOpen(idx){
+  vlbIdx=idx;
+  vlb.classList.remove('lb-closing');
+  vlb.classList.add('lb-open');
+  setTimeout(()=>vlbLoad(vlbIdx),20);
+}
+function vlbClose(){
+  vlbPlayer.pause();
+  vlb.classList.add('lb-closing');
+  setTimeout(()=>{vlb.classList.remove('lb-open','lb-closing');vlbPlayer.src='';},360);
+}
+function vlbNav(dir){
+  vlbPlayer.pause();
+  vlbIdx=(vlbIdx+dir+vlbVids.length)%vlbVids.length;
+  vlbLoad(vlbIdx);
+}
+document.getElementById('vlb-close').onclick=vlbClose;
+document.getElementById('vlb-prev').onclick=()=>vlbNav(-1);
+document.getElementById('vlb-next').onclick=()=>vlbNav(1);
+vlb.addEventListener('click',e=>{if(e.target===vlb)vlbClose();});
+document.addEventListener('keydown',e=>{
+  if(!vlb.classList.contains('lb-open'))return;
+  if(e.key==='Escape')vlbClose();
+  if(e.key==='ArrowLeft')vlbNav(-1);
+  if(e.key==='ArrowRight')vlbNav(1);
+});
+
+/* ── Image Lightbox ── */
+const lbDiags=[
+  {src:'https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Diagrams/Canyon%20Road.drawio.png',   caption:'Canyon Road — Level Flow & Pacing'},
+  {src:'https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Diagrams/Key%20Blaze%20(1).drawio.png', caption:'Key Blaze — Mechanic System Map'},
+  {src:'https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Diagrams/SkyLift%20(1).drawio.png',   caption:'SkyLift — Level Architecture Overview'},
+  {src:'https://raw.githubusercontent.com/thanhdang210203/DangCongThanh_Portfolio/main/Diagrams/StreakRace.drawio.png',     caption:'StreakRace — Player Decision Flowchart'}
+];
+let lbIdx=0;
+const lb=document.getElementById('lb');
+const lbImg=document.getElementById('lb-img');
+const lbCap=document.getElementById('lb-caption');
+const lbCtr=document.getElementById('lb-counter');
+
+function lbSetSlide(idx){
+  lbImg.style.opacity='0';
+  setTimeout(()=>{
+    lbImg.src=lbDiags[idx].src;
+    lbCap.textContent=lbDiags[idx].caption;
+    lbCtr.textContent=(idx+1)+' / '+lbDiags.length;
+    lbImg.onload=()=>lbImg.style.opacity='1';
+    if(lbImg.complete)lbImg.style.opacity='1';
+  },150);
+}
+function lbOpen(idx){
+  lbIdx=idx;
+  lbImg.src='';lbImg.style.opacity='0';
+  lb.classList.remove('lb-closing');
+  lb.classList.add('lb-open');
+  setTimeout(()=>lbSetSlide(lbIdx),20);
+}
+function lbClose(){
+  lb.classList.add('lb-closing');
+  setTimeout(()=>{lb.classList.remove('lb-open','lb-closing');lbImg.src='';},360);
+}
+function lbNav(dir){
+  lbIdx=(lbIdx+dir+lbDiags.length)%lbDiags.length;
+  lbSetSlide(lbIdx);
+}
+document.getElementById('lb-close').onclick=lbClose;
+document.getElementById('lb-prev').onclick=()=>lbNav(-1);
+document.getElementById('lb-next').onclick=()=>lbNav(1);
+lb.addEventListener('click',e=>{if(e.target===lb)lbClose();});
+document.addEventListener('keydown',e=>{
+  if(!lb.classList.contains('lb-open'))return;
+  if(e.key==='Escape')lbClose();
+  if(e.key==='ArrowLeft')lbNav(-1);
+  if(e.key==='ArrowRight')lbNav(1);
+});
+
 /* ── Crosshair cursor ── */
 const c=document.getElementById('c'),cr=document.getElementById('cr');
 let mx=0,my=0,rx=0,ry=0;
@@ -1027,10 +1419,21 @@ function upd(){
   ctr.textContent=String(current+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');
 }
 
-/* ── Intersection observer ── */
+/* ── Intersection observer ──
+   Adaptive threshold: when a slide is taller than the viewport
+   (common on mobile — e.g. the Process slide has 4 cards + videos
+   + diagrams stacked single-column), the max possible intersection
+   ratio is viewport/slideHeight, which can be far below .4. Without
+   adapting, the .anim elements never get the .in class and the
+   whole section stays invisible. */
 const io=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
-    if(e.isIntersecting&&e.intersectionRatio>.4){
+    if(!e.isIntersecting)return;
+    const slideH=e.target.offsetHeight||1;
+    const vh=window.innerHeight||1;
+    const maxRatio=Math.min(1,vh/slideH);
+    const trigger=Math.min(.4,maxRatio*.5);
+    if(e.intersectionRatio>=trigger){
       current=slides.indexOf(e.target);
       upd();
       /* slide left-border + telemetry reveal */
@@ -1044,8 +1447,26 @@ const io=new IntersectionObserver(entries=>{
       });
     }
   });
-},{threshold:.4});
+},{threshold:[0,.1,.2,.3,.4,.5,.6]});
 slides.forEach(s=>io.observe(s));
+
+/* Safety fallback — if a slide somehow never crosses its trigger
+   threshold (rare orientation edge cases), reveal everything after
+   a brief scroll. Mobile-only, won't affect desktop animation. */
+if(window.matchMedia('(max-width:640px)').matches){
+  let revealed=false;
+  const revealAll=()=>{
+    if(revealed)return;
+    revealed=true;
+    document.querySelectorAll('.anim,.anim-grid').forEach(el=>el.classList.add('in'));
+    document.querySelectorAll('.slide').forEach(el=>el.classList.add('in-view'));
+  };
+  /* If user scrolls past the first viewport without all animations firing */
+  setTimeout(()=>{
+    const hidden=document.querySelectorAll('.anim:not(.in),.anim-grid:not(.in)');
+    if(hidden.length>3)revealAll();
+  },4000);
+}
 
 /* ── Keyboard ── */
 document.addEventListener('keydown',e=>{
